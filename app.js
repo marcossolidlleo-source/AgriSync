@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Estado global
     let currentUserRole = null;
     let sensorInterval = null;
-    let lastZapierAlert = 0;
+    let lastEmailAlert = 0;
     let currentGlobalData = null;
     let myLandbot = null;
 
@@ -123,12 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Guardar dato actual para posible exportación manual
         currentGlobalData = currentData;
 
-        // Alerta Crítica Zapier (Humedad < 30%)
+        // Alerta Crítica por Email (Humedad < 30%)
         if (currentData.humedad < 30) {
             const now = Date.now();
-            if (now - lastZapierAlert > 30000) { // Limitar a 1 alerta cada 30 seg
-                sendZapierWebhook(currentData);
-                lastZapierAlert = now;
+            if (now - lastEmailAlert > 60000) { // Limitar a 1 alerta cada 60 seg
+                sendEmailAlert(currentData);
+                lastEmailAlert = now;
             }
         }
     }
@@ -203,21 +203,31 @@ document.addEventListener('DOMContentLoaded', () => {
     /* --- INTEGRACIONES DE SISTEMAS DE INFORMACIÓN (TFP Nivel Pro) --- */
 
     /**
-     * Webhook a Zapier (Alerta Crítica)
+     * Enviar Correo de Alerta Crítica vía FormSubmit
      */
-    function sendZapierWebhook(data) {
-        console.warn('⚠️ ENVIANDO ALERTA A ZAPIER: Humedad Crítica detectada!', data.humedad + '%');
+    function sendEmailAlert(data) {
+        console.warn('⚠️ ENVIANDO CORREO DE ALERTA: Humedad Crítica detectada!', data.humedad + '%');
 
-        // Mock de Fetch hacia el Webhook de Zapier
-        const zapierUrl = 'https://hooks.zapier.com/hooks/catch/mock-id/mock-hash/';
-        /* fetch(zapierUrl, {
-            method: 'POST',
+        fetch("https://formsubmit.co/ajax/agrisyncsif@gmail.com", {
+            method: "POST",
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
             body: JSON.stringify({
-                evento: 'alerta_humedad',
-                humedad: data.humedad,
-                timestamp: new Date().toISOString()
+                _subject: "🚨 ALERTA CRÍTICA - AgriSync",
+                _template: "table",
+                Mensaje: "Atención: La humedad del suelo ha bajado a niveles críticos.",
+                Humedad: data.humedad + "%",
+                Temperatura: data.temperatura + " °C",
+                Nivel_pH: data.ph,
+                Iluminacion: data.iluminacion + " lux",
+                Fecha_Hora: new Date().toLocaleString()
             })
-        }).catch(err => console.error('Error Zapier:', err)); */
+        })
+        .then(response => response.json())
+        .then(data => console.log('✅ Alerta enviada correctamente por correo:', data))
+        .catch(err => console.error('❌ Error al enviar el correo:', err));
     }
 
     /**
