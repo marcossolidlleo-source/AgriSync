@@ -217,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({
                 _subject: "🚨 ALERTA CRÍTICA - AgriSync",
                 _template: "table",
+                _captcha: "false",
                 Mensaje: "Atención: La humedad del suelo ha bajado a niveles críticos.",
                 Humedad: data.humedad + "%",
                 Temperatura: data.temperatura + " °C",
@@ -266,6 +267,90 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             console.log('[Landbot] Chatbot Livechat inicializado e inyectado en la vista.');
         }
+    }
+
+    /* --- HISTORIAL DE SENSORES (RANGO DE FECHAS) --- */
+    const historyStartDate = document.getElementById('history-start-date');
+    const historyEndDate = document.getElementById('history-end-date');
+    const filterHistoryBtn = document.getElementById('filter-history-btn');
+    const historyStatusMsg = document.getElementById('history-status-message');
+    const historyTableContainer = document.getElementById('history-table-container');
+    const historyTableBody = document.getElementById('history-table-body');
+
+    // 1. Crear Array simulado (mock) de los últimos 30 días
+    const historicalData = [];
+    if (historyTableContainer) {
+        const today = new Date();
+        for (let i = 0; i < 30; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            // Formato YYYY-MM-DD
+            const dateStr = d.toISOString().split('T')[0];
+            
+            // Simular datos diarios: Temperatura 15-35, Humedad 40-80
+            const temp = (15 + Math.random() * 20).toFixed(1);
+            const hum = Math.floor(40 + Math.random() * 40);
+            
+            historicalData.push({
+                fecha: dateStr,
+                finca: 'Finca Principal',
+                temperatura: temp,
+                humedad: hum
+            });
+        }
+    }
+
+    // 2. Lógica de Filtrado
+    if (filterHistoryBtn) {
+        filterHistoryBtn.addEventListener('click', () => {
+            const startStr = historyStartDate.value;
+            const endStr = historyEndDate.value;
+
+            // A) Validación
+            if (!startStr || !endStr) {
+                alert("Por favor, selecciona fecha de inicio y fin.");
+                return;
+            }
+            if (new Date(startStr) > new Date(endStr)) {
+                alert("La fecha de inicio no puede ser mayor que la fecha final.");
+                return;
+            }
+
+            // B) Filtrado
+            const filtered = historicalData.filter(record => {
+                return record.fecha >= startStr && record.fecha <= endStr;
+            });
+
+            // C y D) Mostrar Resultados
+            historyStatusMsg.classList.add('hidden');
+            historyTableContainer.classList.remove('hidden');
+            historyTableBody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                historyTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="p-4 text-center text-text-light italic">
+                            No hay registros para estas fechas
+                        </td>
+                    </tr>
+                `;
+            } else {
+                // Ordenar mostrando las más recientes primero
+                filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+                filtered.forEach(record => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0';
+                    tr.innerHTML = `
+                        <td class="p-3 text-sm font-medium text-gray-800">${record.fecha}</td>
+                        <td class="p-3 text-sm text-gray-600">${record.finca}</td>
+                        <td class="p-3 text-sm text-center font-semibold text-orange-600">${record.temperatura} °C</td>
+                        <td class="p-3 text-sm text-center font-semibold text-blue-600">${record.humedad}%</td>
+                    `;
+                    historyTableBody.appendChild(tr);
+                });
+            }
+        });
     }
 
 });

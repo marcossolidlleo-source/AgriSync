@@ -48,7 +48,7 @@
         }
 
         .mobile-container {
-            max-width: 480px;
+            max-width: 1440px;
             margin: 0 auto;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             min-height: 100vh;
@@ -496,21 +496,80 @@
                     </div>
                 </div>
 
-                <!-- Historial de datos -->
-                <div class="card bg-card p-5 mb-6">
-                    <h2 class="text-lg font-semibold text-primary mb-4">Historial Reciente</h2>
-                    <div id="history-container" class="space-y-3">
-                        <!-- Los registros históricos se generarán dinámicamente -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Historial de datos -->
+                    <div class="card bg-card p-5 h-full">
+                        <h2 class="text-lg font-semibold text-primary mb-4">Historial Reciente Simulador</h2>
+                        <div id="history-container" class="space-y-3">
+                            <!-- Los registros históricos se generarán dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Estado del sistema -->
+                    <div class="card bg-card p-5 h-full">
+                        <h2 class="text-lg font-semibold text-primary mb-4">Estado del Sistema</h2>
+                        <div id="system-status-container" class="space-y-3">
+                            <!-- Los estados del sistema se generarán dinámicamente -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- Estado del sistema -->
-                <div class="card bg-card p-5">
-                    <h2 class="text-lg font-semibold text-primary mb-4">Estado del Sistema</h2>
-                    <div id="system-status-container" class="space-y-3">
-                        <!-- Los estados del sistema se generarán dinámicamente -->
+                <!-- Historial de Sensores (Filtro por Fechas y Sensor) -->
+                <div class="card bg-card p-5 mb-6">
+                    <h2 class="text-lg font-semibold text-primary mb-4">Historial y Análisis de Sensores</h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-text-light mb-1">Fecha de Inicio</label>
+                            <input type="date" id="history-start-date" class="input-field w-full px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-light mb-1">Fecha Fin</label>
+                            <input type="date" id="history-end-date" class="input-field w-full px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-light mb-1">Métrica (Sensor)</label>
+                            <select id="history-sensor-filter" class="input-field w-full px-3 py-2">
+                                <option value="Todos">Ambos (Temp y Humedad)</option>
+                                <option value="Temperatura">Solo Temperatura</option>
+                                <option value="Humedad">Solo Humedad</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button id="filter-history-btn" class="btn-primary w-full py-2 h-[42px] text-white font-semibold shadow-md whitespace-nowrap px-2 text-sm">
+                                <i class="fas fa-search mr-1"></i>Filtrar y Analizar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje de estado -->
+                    <p id="history-status-message" class="text-center text-text-light italic mb-4">
+                        Selecciona fechas y un sensor para analizar el historial
+                    </p>
+
+                    <!-- Resumen de Medias (Oculto por defecto) -->
+                    <div id="history-summary" class="hidden mb-4 p-4 bg-green-50 text-green-900 rounded-lg border border-green-200 shadow-sm flex items-center justify-between">
+                        <!-- Promedios inyectados por JS -->
+                    </div>
+
+                    <!-- Tabla de resultados -->
+                    <div class="overflow-x-auto hidden" id="history-table-container">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr id="history-table-head" class="bg-green-50 text-primary border-b-2 border-green-200">
+                                    <th class="p-3 font-semibold text-sm">Fecha</th>
+                                    <th class="p-3 font-semibold text-sm">Finca</th>
+                                    <th id="th-temperatura" class="p-3 font-semibold text-center text-sm">Temperatura</th>
+                                    <th id="th-humedad" class="p-3 font-semibold text-center text-sm">Humedad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body" class="divide-y divide-gray-100">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+
             </main>
 
             <footer class="mt-8 pt-6 border-t border-gray-200">
@@ -1177,6 +1236,125 @@
                         arrayDeSensores.splice(index, 1);
                         localStorage.setItem("misParcelas", JSON.stringify(arrayDeSensores));
                         renderizarSensores();
+                    }
+                });
+            }
+
+            // ==================== HISTORIAL DE SENSORES (FILTRO Y MEDIA) ====================
+            const historyStartDate = document.getElementById('history-start-date');
+            const historyEndDate = document.getElementById('history-end-date');
+            const historySensorFilter = document.getElementById('history-sensor-filter');
+            const filterHistoryBtn = document.getElementById('filter-history-btn');
+            const historyStatusMsg = document.getElementById('history-status-message');
+            const historySummary = document.getElementById('history-summary');
+            const historyTableContainer = document.getElementById('history-table-container');
+            const historyTableBody = document.getElementById('history-table-body');
+            const thTemperatura = document.getElementById('th-temperatura');
+            const thHumedad = document.getElementById('th-humedad');
+
+            const historicalData = [];
+            if (historyTableContainer) {
+                const today = new Date();
+                for (let i = 0; i < 30; i++) {
+                    const d = new Date(today);
+                    d.setDate(today.getDate() - i);
+                    const dateStr = d.toISOString().split('T')[0];
+                    const temp = (15 + Math.random() * 20).toFixed(1);
+                    const hum = Math.floor(40 + Math.random() * 40);
+                    
+                    historicalData.push({
+                        fecha: dateStr,
+                        finca: 'Finca Principal',
+                        temperatura: temp,
+                        humedad: hum
+                    });
+                }
+            }
+
+            if (filterHistoryBtn) {
+                filterHistoryBtn.addEventListener('click', () => {
+                    const startStr = historyStartDate.value;
+                    const endStr = historyEndDate.value;
+                    const selectedSensor = historySensorFilter ? historySensorFilter.value : 'Todos';
+
+                    if (!startStr || !endStr) { 
+                        alert("Por favor, selecciona fecha de inicio y fin."); 
+                        return; 
+                    }
+                    if (new Date(startStr) > new Date(endStr)) { 
+                        alert("La fecha de inicio no puede ser mayor que la fecha final."); 
+                        return; 
+                    }
+                    
+                    const filtered = historicalData.filter(record => record.fecha >= startStr && record.fecha <= endStr);
+                    historyStatusMsg.classList.add('hidden');
+                    historyTableContainer.classList.remove('hidden');
+                    
+                    if (historySummary) historySummary.classList.add('hidden');
+                    historyTableBody.innerHTML = '';
+
+                    // Ajustar columnas
+                    if (thTemperatura && thHumedad) {
+                        if (selectedSensor === 'Temperatura') {
+                            thTemperatura.classList.remove('hidden');
+                            thHumedad.classList.add('hidden');
+                        } else if (selectedSensor === 'Humedad') {
+                            thTemperatura.classList.add('hidden');
+                            thHumedad.classList.remove('hidden');
+                        } else {
+                            thTemperatura.classList.remove('hidden');
+                            thHumedad.classList.remove('hidden');
+                        }
+                    }
+
+                    if (filtered.length === 0) {
+                        historyTableBody.innerHTML = `<tr><td colspan="${selectedSensor === 'Todos' ? 4 : 3}" class="p-4 text-center text-text-light italic">No hay registros para estas fechas</td></tr>`;
+                    } else {
+                        // Calcular Medias
+                        let sumTemp = 0;
+                        let sumHum = 0;
+                        filtered.forEach(r => {
+                            sumTemp += parseFloat(r.temperatura);
+                            sumHum += parseInt(r.humedad);
+                        });
+                        const avgTemp = (sumTemp / filtered.length).toFixed(1);
+                        const avgHum = Math.round(sumHum / filtered.length);
+
+                        // Mostrar Resumen
+                        if (historySummary) {
+                            historySummary.classList.remove('hidden');
+                            let summaryHtml = '<div class="flex flex-col"><span class="text-sm font-bold uppercase tracking-wider opacity-80 mb-2"><i class="fas fa-chart-pie mr-2"></i> Análisis de la Selección (Media)</span><div class="flex gap-6">';
+                            
+                            if (selectedSensor === 'Temperatura' || selectedSensor === 'Todos') {
+                                summaryHtml += `<div><span class="text-xs text-green-800 uppercase block">Temp. Media</span><span class="text-xl font-bold bg-white px-3 py-1 rounded-md shadow-sm text-green-700">${avgTemp} °C</span></div>`;
+                            }
+                            if (selectedSensor === 'Humedad' || selectedSensor === 'Todos') {
+                                summaryHtml += `<div><span class="text-xs text-green-800 uppercase block">Humedad Media</span><span class="text-xl font-bold bg-white px-3 py-1 rounded-md shadow-sm text-green-700">${avgHum}%</span></div>`;
+                            }
+                            summaryHtml += '</div></div>';
+                            historySummary.innerHTML = summaryHtml;
+                        }
+
+                        filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                        filtered.forEach(record => {
+                            const tr = document.createElement('tr');
+                            tr.className = 'hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0';
+                            
+                            let rowHtml = `
+                                <td class="p-3 text-sm font-medium text-gray-800">${record.fecha}</td>
+                                <td class="p-3 text-sm text-gray-600">${record.finca}</td>
+                            `;
+
+                            if (selectedSensor === 'Temperatura' || selectedSensor === 'Todos') {
+                                rowHtml += `<td class="p-3 text-sm text-center font-semibold text-orange-600">${record.temperatura} °C</td>`;
+                            }
+                            if (selectedSensor === 'Humedad' || selectedSensor === 'Todos') {
+                                rowHtml += `<td class="p-3 text-sm text-center font-semibold text-blue-600">${record.humedad}%</td>`;
+                            }
+                            
+                            tr.innerHTML = rowHtml;
+                            historyTableBody.appendChild(tr);
+                        });
                     }
                 });
             }
