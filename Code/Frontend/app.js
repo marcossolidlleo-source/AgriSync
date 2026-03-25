@@ -353,4 +353,77 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /* --- GESTIÓN DE NAVEGACIÓN Y MENÚ DE USUARIO --- */
+    
+    // 1. Menú Flotante de Usuario (Logout)
+    const userCardContainer = document.getElementById('user-card-container');
+    const userOptionsPopup = document.getElementById('user-options-popup');
+    const logoutBtnSidebar = document.getElementById('logout-btn-sidebar');
+
+    if (userCardContainer && userOptionsPopup) {
+        userCardContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (userOptionsPopup.classList.contains('hidden')) {
+                userOptionsPopup.classList.remove('hidden');
+                setTimeout(() => {
+                    userOptionsPopup.classList.remove('opacity-0', 'translate-y-2');
+                }, 10);
+            } else {
+                userOptionsPopup.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => {
+                    userOptionsPopup.classList.add('hidden');
+                }, 300);
+            }
+        });
+
+        // Cerrar popup al hacer click fuera
+        document.addEventListener('click', (e) => {
+            if (!userCardContainer.contains(e.target) && !userOptionsPopup.classList.contains('hidden')) {
+                userOptionsPopup.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => userOptionsPopup.classList.add('hidden'), 300);
+            }
+        });
+    }
+
+    if (logoutBtnSidebar) {
+        logoutBtnSidebar.addEventListener('click', () => {
+            userOptionsPopup.classList.add('hidden', 'opacity-0', 'translate-y-2');
+            if (typeof logout === 'function') {
+                logout();
+            }
+        });
+    }
+
+    // 2. Navegación por Secciones del Sidebar
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    const contentSections = document.querySelectorAll('.content-section');
+
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            const targetId = link.getAttribute('href');
+            if (targetId && targetId.startsWith('#')) {
+                e.preventDefault();
+                
+                // Actualizar estado 'active' en links
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Mostrar la sección correspondiente
+                const sectionId = 'section-' + targetId.substring(1);
+                contentSections.forEach(sec => {
+                    if (sec.id === sectionId) {
+                        sec.classList.add('active');
+                    } else {
+                        sec.classList.remove('active');
+                    }
+                });
+
+                // Si estamos en móvil y toggleSidebar existe, cerrar sidebar
+                if (window.innerWidth < 768 && typeof window.toggleSidebar === 'function') {
+                    window.toggleSidebar();
+                }
+            }
+        });
+    });
+
 });

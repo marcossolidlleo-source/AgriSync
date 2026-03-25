@@ -357,9 +357,7 @@
             </header>
 
             <main class="flex-grow flex flex-col justify-center">
-                <div class="card bg-card p-8 mb-8">
-                    <h2 class="text-2xl font-semibold text-center mb-8 text-primary">Acceso Seguro</h2>
-
+                <div class="card bg-card p-8 mb-8 max-w-md mx-auto w-full">
                     <form id="login-form" class="space-y-6">
                         <div>
                             <label for="password"
@@ -450,18 +448,30 @@
                     </a>
                 </nav>
 
-                <div
-                    class="p-4 border-t border-white/10 m-4 rounded-2xl bg-black/15 backdrop-blur-md shadow-inner border border-white/5">
-                    <div class="flex items-center gap-3">
-                        <button id="user-menu-side"
-                            class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a5d1a] to-[#2e7d32] border-[1.5px] border-[#FFC107] flex items-center justify-center text-white shadow-md transition-transform hover:scale-105 shrink-0">
-                            <i class="fas fa-user text-sm"></i>
+                <div class="relative m-4">
+                    <!-- Popup options -->
+                    <div id="user-options-popup"
+                        class="absolute bottom-full left-0 w-full mb-2 bg-white rounded-xl shadow-lg p-2 hidden transform transition-all duration-300 opacity-0 translate-y-2 z-50 border border-gray-100">
+                        <button id="logout-btn-sidebar"
+                            class="w-full flex items-center justify-between px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-bold text-sm">
+                            <span>Cerrar sesión</span>
+                            <i class="fas fa-door-open text-lg"></i>
                         </button>
-                        <div class="flex-1 overflow-hidden">
-                            <p class="text-[0.9rem] font-bold text-white truncate shadow-sm">Usuario <span
-                                    id="user-role-display-side"></span></p>
-                            <p class="text-xs text-[#FFC107] font-medium truncate mt-0.5"><i
-                                    class="fas fa-circle text-[0.5rem] mr-1 mb-0.5 align-middle"></i>En línea</p>
+                    </div>
+
+                    <div id="user-card-container"
+                        class="p-4 border-t border-white/10 rounded-2xl bg-black/15 backdrop-blur-md shadow-inner border border-white/5 cursor-pointer transition-colors hover:bg-black/25 relative">
+                        <div class="flex items-center gap-3">
+                            <div id="user-menu-side"
+                                class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a5d1a] to-[#2e7d32] border-[1.5px] border-[#FFC107] flex items-center justify-center text-white shadow-md shrink-0">
+                                <i class="fas fa-user text-sm"></i>
+                            </div>
+                            <div class="flex-1 overflow-hidden">
+                                <p class="text-[0.9rem] font-bold text-white truncate shadow-sm">Usuario <span
+                                        id="user-role-display-side"></span></p>
+                                <p class="text-xs text-[#FFC107] font-medium truncate mt-0.5"><i
+                                        class="fas fa-circle text-[0.5rem] mr-1 mb-0.5 align-middle"></i>En línea</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -481,7 +491,7 @@
                                 onclick="toggleSidebar()">
                                 <i class="fas fa-bars text-lg"></i>
                             </button>
-                            
+
                             <!-- Hidden elements strictly to preserve JS logic -->
                             <button id="back-to-login" class="hidden"></button>
                             <span id="connection-status" class="hidden">Conectado</span>
@@ -493,174 +503,242 @@
                             <button id="open-crop-guide-btn"
                                 class="px-4 py-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-sm font-semibold transition-colors border border-emerald-200 flex items-center gap-2 shadow-sm whitespace-nowrap"
                                 title="Buscador de Cultivos">
-                                <i class="fas fa-search text-emerald-600"></i> <span class="hidden sm:inline">Buscador de Cultivos</span>
+                                <i class="fas fa-search text-emerald-600"></i> <span class="hidden sm:inline">Buscador
+                                    de Cultivos</span>
                             </button>
                             <button id="test-slack-btn"
                                 class="hidden p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-xl text-xs font-bold transition-colors">
                                 <i class="fas fa-bell mr-1"></i> Probar Alerta
                             </button>
-                            <button id="refresh-data" class="w-10 h-10 flex items-center justify-center text-primary bg-white hover:bg-gray-50 border border-gray-200 rounded-xl shadow-sm transition-colors"
+                            <button id="refresh-data"
+                                class="w-10 h-10 flex items-center justify-center text-primary bg-white hover:bg-gray-50 border border-gray-200 rounded-xl shadow-sm transition-colors"
                                 title="Sincronizar Datos">
                                 <i class="fas fa-sync-alt"></i>
                             </button>
                         </div>
                     </header>
 
-                    <main>
-                        <!-- Información de la finca -->
-                        <div class="card bg-card p-5 mb-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <div class="flex items-center gap-3">
-                                        <h2 id="farm-name" class="text-lg font-semibold text-primary">Finca Principal
-                                        </h2>
-                                        <button id="edit-farm-btn">Editar Finca</button>
+                    <main class="relative w-full h-full">
+                        <style>
+                            .content-section {
+                                display: none;
+                            }
+
+                            .content-section.active {
+                                display: block;
+                                animation: fadeIn 0.3s ease;
+                            }
+
+                            @keyframes fadeIn {
+                                from {
+                                    opacity: 0;
+                                }
+
+                                to {
+                                    opacity: 1;
+                                }
+                            }
+                        </style>
+
+                        <div id="section-dashboard" class="content-section active">
+                            <!-- Información de la finca -->
+                            <div class="card bg-card p-5 mb-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <div class="flex items-center gap-3">
+                                            <h2 id="farm-name" class="text-lg font-semibold text-primary">Finca
+                                                Principal
+                                            </h2>
+                                            <button id="edit-farm-btn">Editar Finca</button>
+                                        </div>
+                                        <p class="text-sm text-text-light mt-1">Cultivo: Maíz • Sector: Norte</p>
                                     </div>
-                                    <p class="text-sm text-text-light mt-1">Cultivo: Maíz • Sector: Norte</p>
+                                    <span class="px-3 py-1 bg-green-100 text-primary rounded-full text-sm font-medium">
+                                        <i class="fas fa-check-circle mr-1"></i> Activo
+                                    </span>
                                 </div>
-                                <span class="px-3 py-1 bg-green-100 text-primary rounded-full text-sm font-medium">
-                                    <i class="fas fa-check-circle mr-1"></i> Activo
-                                </span>
+                                <div class="grid grid-cols-2 gap-4 text-center">
+                                    <div>
+                                        <p class="text-sm text-text-light">Área total</p>
+                                        <p class="font-semibold">5.2 ha</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-text-light">Última siembra</p>
+                                        <p class="font-semibold">15 Mar 2024</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="grid grid-cols-2 gap-4 text-center">
-                                <div>
-                                    <p class="text-sm text-text-light">Área total</p>
-                                    <p class="font-semibold">5.2 ha</p>
+
+                            <!-- Formulario Añadir Sensor/Parcela -->
+                            <div class="add-sensor-form tracking-wide">
+                                <h3>Configurar Nuevo Sensor</h3>
+                                <form id="sensor-form">
+                                    <div class="form-group">
+                                        <label for="plot-name">Nombre de la Parcela</label>
+                                        <input type="text" id="plot-name" placeholder="Ej: Sector Variante" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="crop-type">Tipo de Cultivo</label>
+                                        <input type="text" id="crop-type" placeholder="Ej: Tomate Cherry" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="metric-type">Métrica a Medir</label>
+                                        <select id="metric-type" required>
+                                            <option value="Humedad">Humedad (%)</option>
+                                            <option value="Temperatura">Temperatura (°C)</option>
+                                            <option value="pH">Nivel de pH</option>
+                                            <option value="Luz">Luz (lux)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ideal-value">Valor Ideal</label>
+                                        <input type="number" id="ideal-value" placeholder="Ej: 60 (humedad) o 25 (temp)"
+                                            step="0.1" required>
+                                    </div>
+                                    <button type="submit" class="btn-add-sensor">➕ Añadir Sensor</button>
+                                </form>
+                            </div>
+
+                            <!-- Contenedor vacío donde la lógica JS pintará las tarjetas -->
+                            <div id="contenedorSensores" class="mb-8 font-sans"></div>
+
+                            <!-- Tarjetas de sensores -->
+                            <div class="mb-8">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h2 class="text-xl font-bold text-primary">Datos en Tiempo Real</h2>
+                                    <div class="flex items-center text-sm text-text-light">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        <span id="last-update">Actualizando...</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-text-light">Última siembra</p>
-                                    <p class="font-semibold">15 Mar 2024</p>
+
+                                <div id="sensor-cards-container" class="grid grid-cols-1 gap-4">
+                                    <!-- Las tarjetas se generarán dinámicamente desde JavaScript -->
                                 </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                <!-- Historial de datos -->
+                                <div class="card bg-card p-5 h-full">
+                                    <h2 class="text-lg font-semibold text-primary mb-4">Historial Reciente Simulador
+                                    </h2>
+                                    <div id="history-container" class="space-y-3">
+                                        <!-- Los registros históricos se generarán dinámicamente -->
+                                    </div>
+                                </div>
+
+                                <!-- Estado del sistema -->
+                                <div class="card bg-card p-5 h-full">
+                                    <h2 class="text-lg font-semibold text-primary mb-4">Estado del Sistema</h2>
+                                    <div id="system-status-container" class="space-y-3">
+                                        <!-- Los estados del sistema se generarán dinámicamente -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Historial de Sensores (Filtro por Fechas y Sensor) -->
+                            <div class="card bg-card p-5 mb-6">
+                                <h2 class="text-lg font-semibold text-primary mb-4">Historial y Análisis de Sensores
+                                </h2>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-text-light mb-1">Fecha de
+                                            Inicio</label>
+                                        <input type="date" id="history-start-date" class="input-field w-full px-3 py-2">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-text-light mb-1">Fecha Fin</label>
+                                        <input type="date" id="history-end-date" class="input-field w-full px-3 py-2">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-text-light mb-1">Métrica
+                                            (Sensor)</label>
+                                        <select id="history-sensor-filter" class="input-field w-full px-3 py-2">
+                                            <option value="Todos">Ambos (Temp y Humedad)</option>
+                                            <option value="Temperatura">Solo Temperatura</option>
+                                            <option value="Humedad">Solo Humedad</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-end">
+                                        <button id="filter-history-btn"
+                                            class="btn-primary w-full py-2 h-[42px] text-white font-semibold shadow-md whitespace-nowrap px-2 text-sm">
+                                            <i class="fas fa-search mr-1"></i>Filtrar y Analizar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Mensaje de estado -->
+                                <p id="history-status-message" class="text-center text-text-light italic mb-4">
+                                    Selecciona fechas y un sensor para analizar el historial
+                                </p>
+
+                                <!-- Resumen de Medias (Oculto por defecto) -->
+                                <div id="history-summary"
+                                    class="hidden mb-4 p-4 bg-green-50 text-green-900 rounded-lg border border-green-200 shadow-sm flex items-center justify-between">
+                                    <!-- Promedios inyectados por JS -->
+                                </div>
+
+                                <!-- Tabla de resultados -->
+                                <div class="overflow-x-auto hidden" id="history-table-container">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr id="history-table-head"
+                                                class="bg-green-50 text-primary border-b-2 border-green-200">
+                                                <th class="p-3 font-semibold text-sm">Fecha</th>
+                                                <th class="p-3 font-semibold text-sm">Finca</th>
+                                                <th id="th-temperatura" class="p-3 font-semibold text-center text-sm">
+                                                    Temperatura
+                                                </th>
+                                                <th id="th-humedad" class="p-3 font-semibold text-center text-sm">
+                                                    Humedad
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="history-table-body" class="divide-y divide-gray-100">
+                                            <!-- Filas dinámicas -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div> <!-- End section-dashboard -->
+
+                        <!-- Empty Sections -->
+                        <div id="section-mapas" class="content-section">
+                            <div
+                                class="card bg-card p-8 mb-8 text-center text-text-light flex flex-col items-center justify-center min-h-[400px]">
+                                <i class="fas fa-map text-5xl mb-4 text-gray-300"></i>
+                                <h2 class="text-2xl font-semibold text-primary">Mapas y Lotes</h2>
+                                <p class="mt-2 text-gray-500">Esta sección aún no tiene contenido. Próximamente
+                                    disponible.</p>
                             </div>
                         </div>
-
-                        <!-- Formulario Añadir Sensor/Parcela -->
-                        <div class="add-sensor-form tracking-wide">
-                            <h3>Configurar Nuevo Sensor</h3>
-                            <form id="sensor-form">
-                                <div class="form-group">
-                                    <label for="plot-name">Nombre de la Parcela</label>
-                                    <input type="text" id="plot-name" placeholder="Ej: Sector Variante" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="crop-type">Tipo de Cultivo</label>
-                                    <input type="text" id="crop-type" placeholder="Ej: Tomate Cherry" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="metric-type">Métrica a Medir</label>
-                                    <select id="metric-type" required>
-                                        <option value="Humedad">Humedad (%)</option>
-                                        <option value="Temperatura">Temperatura (°C)</option>
-                                        <option value="pH">Nivel de pH</option>
-                                        <option value="Luz">Luz (lux)</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="ideal-value">Valor Ideal</label>
-                                    <input type="number" id="ideal-value" placeholder="Ej: 60 (humedad) o 25 (temp)"
-                                        step="0.1" required>
-                                </div>
-                                <button type="submit" class="btn-add-sensor">➕ Añadir Sensor</button>
-                            </form>
-                        </div>
-
-                        <!-- Contenedor vacío donde la lógica JS pintará las tarjetas -->
-                        <div id="contenedorSensores" class="mb-8 font-sans"></div>
-
-                        <!-- Tarjetas de sensores -->
-                        <div class="mb-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <h2 class="text-xl font-bold text-primary">Datos en Tiempo Real</h2>
-                                <div class="flex items-center text-sm text-text-light">
-                                    <i class="fas fa-clock mr-1"></i>
-                                    <span id="last-update">Actualizando...</span>
-                                </div>
-                            </div>
-
-                            <div id="sensor-cards-container" class="grid grid-cols-1 gap-4">
-                                <!-- Las tarjetas se generarán dinámicamente desde JavaScript -->
+                        <div id="section-estadisticas" class="content-section">
+                            <div
+                                class="card bg-card p-8 mb-8 text-center text-text-light flex flex-col items-center justify-center min-h-[400px]">
+                                <i class="fas fa-chart-line text-5xl mb-4 text-gray-300"></i>
+                                <h2 class="text-2xl font-semibold text-primary">Estadísticas</h2>
+                                <p class="mt-2 text-gray-500">Esta sección aún no tiene contenido. Próximamente
+                                    disponible.</p>
                             </div>
                         </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            <!-- Historial de datos -->
-                            <div class="card bg-card p-5 h-full">
-                                <h2 class="text-lg font-semibold text-primary mb-4">Historial Reciente Simulador</h2>
-                                <div id="history-container" class="space-y-3">
-                                    <!-- Los registros históricos se generarán dinámicamente -->
-                                </div>
-                            </div>
-
-                            <!-- Estado del sistema -->
-                            <div class="card bg-card p-5 h-full">
-                                <h2 class="text-lg font-semibold text-primary mb-4">Estado del Sistema</h2>
-                                <div id="system-status-container" class="space-y-3">
-                                    <!-- Los estados del sistema se generarán dinámicamente -->
-                                </div>
+                        <div id="section-sensores" class="content-section">
+                            <div
+                                class="card bg-card p-8 mb-8 text-center text-text-light flex flex-col items-center justify-center min-h-[400px]">
+                                <i class="fas fa-thermometer-half text-5xl mb-4 text-gray-300"></i>
+                                <h2 class="text-2xl font-semibold text-primary">Sensores Clima</h2>
+                                <p class="mt-2 text-gray-500">Esta sección aún no tiene contenido. Próximamente
+                                    disponible.</p>
                             </div>
                         </div>
-
-                        <!-- Historial de Sensores (Filtro por Fechas y Sensor) -->
-                        <div class="card bg-card p-5 mb-6">
-                            <h2 class="text-lg font-semibold text-primary mb-4">Historial y Análisis de Sensores</h2>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-text-light mb-1">Fecha de
-                                        Inicio</label>
-                                    <input type="date" id="history-start-date" class="input-field w-full px-3 py-2">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-text-light mb-1">Fecha Fin</label>
-                                    <input type="date" id="history-end-date" class="input-field w-full px-3 py-2">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-text-light mb-1">Métrica
-                                        (Sensor)</label>
-                                    <select id="history-sensor-filter" class="input-field w-full px-3 py-2">
-                                        <option value="Todos">Ambos (Temp y Humedad)</option>
-                                        <option value="Temperatura">Solo Temperatura</option>
-                                        <option value="Humedad">Solo Humedad</option>
-                                    </select>
-                                </div>
-                                <div class="flex items-end">
-                                    <button id="filter-history-btn"
-                                        class="btn-primary w-full py-2 h-[42px] text-white font-semibold shadow-md whitespace-nowrap px-2 text-sm">
-                                        <i class="fas fa-search mr-1"></i>Filtrar y Analizar
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Mensaje de estado -->
-                            <p id="history-status-message" class="text-center text-text-light italic mb-4">
-                                Selecciona fechas y un sensor para analizar el historial
-                            </p>
-
-                            <!-- Resumen de Medias (Oculto por defecto) -->
-                            <div id="history-summary"
-                                class="hidden mb-4 p-4 bg-green-50 text-green-900 rounded-lg border border-green-200 shadow-sm flex items-center justify-between">
-                                <!-- Promedios inyectados por JS -->
-                            </div>
-
-                            <!-- Tabla de resultados -->
-                            <div class="overflow-x-auto hidden" id="history-table-container">
-                                <table class="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr id="history-table-head"
-                                            class="bg-green-50 text-primary border-b-2 border-green-200">
-                                            <th class="p-3 font-semibold text-sm">Fecha</th>
-                                            <th class="p-3 font-semibold text-sm">Finca</th>
-                                            <th id="th-temperatura" class="p-3 font-semibold text-center text-sm">
-                                                Temperatura
-                                            </th>
-                                            <th id="th-humedad" class="p-3 font-semibold text-center text-sm">Humedad
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="history-table-body" class="divide-y divide-gray-100">
-                                        <!-- Filas dinámicas -->
-                                    </tbody>
-                                </table>
+                        <div id="section-configuracion" class="content-section">
+                            <div
+                                class="card bg-card p-8 mb-8 text-center text-text-light flex flex-col items-center justify-center min-h-[400px]">
+                                <i class="fas fa-cog text-5xl mb-4 text-gray-300"></i>
+                                <h2 class="text-2xl font-semibold text-primary">Ajustes</h2>
+                                <p class="mt-2 text-gray-500">Esta sección aún no tiene contenido. Próximamente
+                                    disponible.</p>
                             </div>
                         </div>
 
@@ -1852,6 +1930,72 @@
                     modal.addEventListener("click", (e) => { if (e.target === modal) cerrar(); });
                 }
             })();
+
+            // ==================== MENÚ DE USUARIO Y LOGOUT ====================
+            const userCardContainer = document.getElementById('user-card-container');
+            const userOptionsPopup = document.getElementById('user-options-popup');
+            const logoutBtnSidebar = document.getElementById('logout-btn-sidebar');
+
+            if (userCardContainer && userOptionsPopup) {
+                userCardContainer.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (userOptionsPopup.classList.contains('hidden')) {
+                        userOptionsPopup.classList.remove('hidden');
+                        setTimeout(() => {
+                            userOptionsPopup.classList.remove('opacity-0', 'translate-y-2');
+                        }, 10);
+                    } else {
+                        userOptionsPopup.classList.add('opacity-0', 'translate-y-2');
+                        setTimeout(() => userOptionsPopup.classList.add('hidden'), 300);
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!userCardContainer.contains(e.target) && !userOptionsPopup.classList.contains('hidden')) {
+                        userOptionsPopup.classList.add('opacity-0', 'translate-y-2');
+                        setTimeout(() => userOptionsPopup.classList.add('hidden'), 300);
+                    }
+                });
+            }
+
+            if (logoutBtnSidebar) {
+                logoutBtnSidebar.addEventListener('click', () => {
+                    userOptionsPopup.classList.add('hidden', 'opacity-0', 'translate-y-2');
+                    switchScreen("login");
+                    stopAutoRefresh();
+                    currentUserRole = "";
+                });
+            }
+
+            // ==================== COMUNICACIÓN ENTRE SECCIONES DEL SIDEBAR ====================
+            const sideLinks = document.querySelectorAll('.sidebar-link');
+            const secContainers = document.querySelectorAll('.content-section');
+
+            sideLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const targetId = link.getAttribute('href');
+                    if (targetId && targetId.startsWith('#')) {
+                        e.preventDefault();
+                        
+                        sideLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+
+                        const sectionId = 'section-' + targetId.substring(1);
+                        secContainers.forEach(sec => {
+                            if (sec.id === sectionId) {
+                                sec.classList.add('active');
+                            } else {
+                                sec.classList.remove('active');
+                            }
+                        });
+
+                        if (window.innerWidth < 768 && typeof window.toggleSidebar === 'function') {
+                            window.toggleSidebar();
+                        }
+                    }
+                });
+            });
+
         });
 
         // ==================== ACTUALIZACIÓN AUTOMÁTICA ====================
