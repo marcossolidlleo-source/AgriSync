@@ -71,7 +71,7 @@
         }
 
         #dashboard-screen.active {
-            display: block !important;
+            display: flex !important;
         }
 
         .card {
@@ -304,6 +304,20 @@
             font-size: 0.9rem;
             margin-top: 4px;
         }
+
+        /* Sidebar Styles */
+        .sidebar-link.active {
+            background-color: #1a4216;
+            /* Darker green */
+            color: #ffffff;
+            box-shadow: inset 4px 0 0 #FFC107;
+            /* Amber accent border left */
+        }
+
+        .sidebar-link.active i {
+            color: #FFC107;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 
@@ -381,366 +395,396 @@
         </div>
 
         <!-- Dashboard Principal -->
-        <div id="dashboard-screen" class="screen p-4 pt-safe-top pb-safe-bottom min-h-screen">
-            <header class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                    <button id="back-to-login" class="p-2 text-primary hover:bg-gray-100 rounded-lg mr-3">
-                        <i class="fas fa-arrow-left text-lg"></i>
-                    </button>
+        <div id="dashboard-screen" class="screen min-h-screen flex bg-background w-full">
+            <!-- Mobile overlay -->
+            <div id="sidebar-overlay"
+                class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity opacity-0 duration-300"
+                onclick="toggleSidebar()"></div>
+
+            <!-- Sidebar -->
+            <aside id="app-sidebar"
+                class="bg-[#2D5A27] text-[#F4F7F6] w-[260px] shrink-0 fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 flex flex-col shadow-2xl md:shadow-none border-r border-[#1e4219]">
+                <div class="p-6 flex items-center justify-between border-b border-white/10">
                     <div class="flex items-center gap-3">
-                        <svg width="36" height="36" viewBox="0 0 200 200" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M100 40 C120 40, 140 60, 140 90 C140 120, 120 150, 100 160 C80 150, 60 120, 60 90 C60 60, 80 40, 100 40 Z"
-                                fill="#22c55e" opacity="0.9" />
-                            <path d="M100 40 L100 160" stroke="#16a34a" stroke-width="2" stroke-linecap="round" />
-                            <path d="M75 90 C75 78, 85 70, 95 70" stroke="#374151" stroke-width="3"
-                                stroke-linecap="round" />
-                            <path d="M95 70 L90 65 M95 70 L90 75" stroke="#374151" stroke-width="3"
-                                stroke-linecap="round" />
-                            <path d="M125 90 C125 102, 115 110, 105 110" stroke="#374151" stroke-width="3"
-                                stroke-linecap="round" />
-                            <path d="M105 110 L110 115 M105 110 L110 105" stroke="#374151" stroke-width="3"
-                                stroke-linecap="round" />
-                            <circle cx="85" cy="100" r="3" fill="#374151" />
-                            <circle cx="100" cy="95" r="3" fill="#374151" />
-                            <circle cx="115" cy="100" r="3" fill="#374151" />
-                        </svg>
-                        <div>
-                            <h1 class="text-xl font-bold tracking-tight leading-none mb-1">
-                                <span class="text-[#22c55e]">Agri</span><span class="text-[#374151]">Sync</span>
-                            </h1>
-                            <div class="flex items-center">
-                                <span
-                                    class="status-indicator status-connected transform scale-75 origin-left mb-0"></span>
-                                <span class="text-xs text-text-light" id="connection-status">Conectado</span>
-                                <span class="text-xs font-bold text-primary ml-2 border-l border-gray-300 pl-2"
-                                    id="user-role-display"></span>
-                            </div>
+                        <div
+                            class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-inner">
+                            <i class="fas fa-seedling text-[#FFC107] text-xl"></i>
                         </div>
+                        <h2 class="text-2xl font-black tracking-tight text-white mb-0 mt-0">Agri<span
+                                class="text-[#FFC107]">Sync</span></h2>
                     </div>
-                </div>
-
-                <div class="flex items-center space-x-3">
-                    <button id="open-crop-guide-btn" class="p-1.5 px-3 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg text-sm font-semibold transition-colors border border-amber-200 flex items-center gap-1.5 shadow-sm" title="Guía Inteligente de Cultivos">
-                        <i class="fas fa-book-open"></i> <span class="hidden sm:inline">Guía de Cultivos</span>
-                    </button>
-                    <button id="test-slack-btn"
-                        class="hidden p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-xs font-bold transition-colors">
-                        <i class="fas fa-bell mr-1"></i> Probar Alerta
-                    </button>
-                    <button id="refresh-data" class="p-2 text-primary hover:bg-gray-100 rounded-lg" title="Sincronizar Datos">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <div class="relative">
-                        <button id="user-menu"
-                            class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center">
-                            <i class="fas fa-user"></i>
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <main>
-                <!-- Información de la finca -->
-                <div class="card bg-card p-5 mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <div class="flex items-center gap-3">
-                                <h2 id="farm-name" class="text-lg font-semibold text-primary">Finca Principal</h2>
-                                <button id="edit-farm-btn">Editar Finca</button>
-                            </div>
-                            <p class="text-sm text-text-light mt-1">Cultivo: Maíz • Sector: Norte</p>
-                        </div>
-                        <span class="px-3 py-1 bg-green-100 text-primary rounded-full text-sm font-medium">
-                            <i class="fas fa-check-circle mr-1"></i> Activo
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 text-center">
-                        <div>
-                            <p class="text-sm text-text-light">Área total</p>
-                            <p class="font-semibold">5.2 ha</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-text-light">Última siembra</p>
-                            <p class="font-semibold">15 Mar 2024</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Formulario Añadir Sensor/Parcela -->
-                <div class="add-sensor-form tracking-wide">
-                    <h3>Configurar Nuevo Sensor</h3>
-                    <form id="sensor-form">
-                        <div class="form-group">
-                            <label for="plot-name">Nombre de la Parcela</label>
-                            <input type="text" id="plot-name" placeholder="Ej: Sector Variante" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="crop-type">Tipo de Cultivo</label>
-                            <input type="text" id="crop-type" placeholder="Ej: Tomate Cherry" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="metric-type">Métrica a Medir</label>
-                            <select id="metric-type" required>
-                                <option value="Humedad">Humedad (%)</option>
-                                <option value="Temperatura">Temperatura (°C)</option>
-                                <option value="pH">Nivel de pH</option>
-                                <option value="Luz">Luz (lux)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="ideal-value">Valor Ideal</label>
-                            <input type="number" id="ideal-value" placeholder="Ej: 60 (humedad) o 25 (temp)" step="0.1"
-                                required>
-                        </div>
-                        <button type="submit" class="btn-add-sensor">➕ Añadir Sensor</button>
-                    </form>
-                </div>
-
-                <!-- Contenedor vacío donde la lógica JS pintará las tarjetas -->
-                <div id="contenedorSensores" class="mb-8 font-sans"></div>
-
-                <!-- Tarjetas de sensores -->
-                <div class="mb-8">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-bold text-primary">Datos en Tiempo Real</h2>
-                        <div class="flex items-center text-sm text-text-light">
-                            <i class="fas fa-clock mr-1"></i>
-                            <span id="last-update">Actualizando...</span>
-                        </div>
-                    </div>
-
-                    <div id="sensor-cards-container" class="grid grid-cols-1 gap-4">
-                        <!-- Las tarjetas se generarán dinámicamente desde JavaScript -->
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Historial de datos -->
-                    <div class="card bg-card p-5 h-full">
-                        <h2 class="text-lg font-semibold text-primary mb-4">Historial Reciente Simulador</h2>
-                        <div id="history-container" class="space-y-3">
-                            <!-- Los registros históricos se generarán dinámicamente -->
-                        </div>
-                    </div>
-
-                    <!-- Estado del sistema -->
-                    <div class="card bg-card p-5 h-full">
-                        <h2 class="text-lg font-semibold text-primary mb-4">Estado del Sistema</h2>
-                        <div id="system-status-container" class="space-y-3">
-                            <!-- Los estados del sistema se generarán dinámicamente -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Historial de Sensores (Filtro por Fechas y Sensor) -->
-                <div class="card bg-card p-5 mb-6">
-                    <h2 class="text-lg font-semibold text-primary mb-4">Historial y Análisis de Sensores</h2>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <label class="block text-sm font-medium text-text-light mb-1">Fecha de Inicio</label>
-                            <input type="date" id="history-start-date" class="input-field w-full px-3 py-2">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-text-light mb-1">Fecha Fin</label>
-                            <input type="date" id="history-end-date" class="input-field w-full px-3 py-2">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-text-light mb-1">Métrica (Sensor)</label>
-                            <select id="history-sensor-filter" class="input-field w-full px-3 py-2">
-                                <option value="Todos">Ambos (Temp y Humedad)</option>
-                                <option value="Temperatura">Solo Temperatura</option>
-                                <option value="Humedad">Solo Humedad</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button id="filter-history-btn"
-                                class="btn-primary w-full py-2 h-[42px] text-white font-semibold shadow-md whitespace-nowrap px-2 text-sm">
-                                <i class="fas fa-search mr-1"></i>Filtrar y Analizar
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Mensaje de estado -->
-                    <p id="history-status-message" class="text-center text-text-light italic mb-4">
-                        Selecciona fechas y un sensor para analizar el historial
-                    </p>
-
-                    <!-- Resumen de Medias (Oculto por defecto) -->
-                    <div id="history-summary"
-                        class="hidden mb-4 p-4 bg-green-50 text-green-900 rounded-lg border border-green-200 shadow-sm flex items-center justify-between">
-                        <!-- Promedios inyectados por JS -->
-                    </div>
-
-                    <!-- Tabla de resultados -->
-                    <div class="overflow-x-auto hidden" id="history-table-container">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr id="history-table-head"
-                                    class="bg-green-50 text-primary border-b-2 border-green-200">
-                                    <th class="p-3 font-semibold text-sm">Fecha</th>
-                                    <th class="p-3 font-semibold text-sm">Finca</th>
-                                    <th id="th-temperatura" class="p-3 font-semibold text-center text-sm">Temperatura
-                                    </th>
-                                    <th id="th-humedad" class="p-3 font-semibold text-center text-sm">Humedad</th>
-                                </tr>
-                            </thead>
-                            <tbody id="history-table-body" class="divide-y divide-gray-100">
-                                <!-- Filas dinámicas -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </main>
-
-            <footer class="mt-8 pt-6 border-t border-gray-200 pb-6">
-                <div class="text-center flex flex-col items-center">
-                    <p class="text-sm text-text-light mb-2">
-                        <i class="fas fa-cloud mr-1"></i>
-                        Sincronización de Datos
-                    </p>
-                    <div class="flex items-center justify-center gap-3 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm mt-1">
-                        <label for="refresh-interval-select" class="text-xs font-medium text-text-light">
-                            <i class="fas fa-sync-alt mr-1"></i> Actualización:
-                        </label>
-                        <select id="refresh-interval-select" class="text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-primary outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 cursor-pointer transition-all">
-                            <option value="5000">Cada 5 segundos</option>
-                            <option value="15000">Cada 15 segundos</option>
-                            <option value="30000" selected>Cada 30 segundos</option>
-                            <option value="60000">Cada minuto</option>
-                            <option value="0">Pausada (Manual)</option>
-                        </select>
-                    </div>
-                </div>
-            </footer>
-        </div>
-
-        <!-- Modal Guía de Cultivos -->
-        <div id="crop-guide-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60] hidden opacity-0 transition-opacity duration-300">
-            <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl transform scale-95 transition-transform duration-300">
-                <!-- Header -->
-                <div class="sticky top-0 bg-white/90 backdrop-blur-md px-6 py-4 border-b border-gray-100 flex justify-between items-center z-10">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-amber-100 text-amber-600 p-2.5 rounded-xl shadow-inner">
-                            <i class="fas fa-lightbulb text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-bold text-gray-800 tracking-tight leading-none">Guía de Cultivos</h3>
-                            <p class="text-sm text-gray-500 mt-1">Recomendaciones basadas en tus sensores actuales</p>
-                        </div>
-                    </div>
-                    <button id="close-crop-guide-btn" class="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors">
+                    <button
+                        class="md:hidden text-white/70 hover:text-[#FFC107] transition-colors p-2 rounded-lg hover:bg-white/10"
+                        onclick="toggleSidebar()">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
-                
-                <!-- Magic Touch Alert -->
-                <div class="px-6 pt-6">
-                    <div id="magic-crop-alert" class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 flex items-start gap-4 shadow-inner">
-                        <div class="bg-white p-2.5 text-emerald-500 rounded-full shadow-sm">
-                            <i class="fas fa-magic text-xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-emerald-800 text-lg mb-1">Análisis Inteligente en Tiempo Real</h4>
-                            <p id="magic-crop-text" class="text-emerald-700 text-sm font-medium leading-relaxed">
-                                Cargando datos de los sensores...
-                            </p>
+
+                <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto w-full">
+                    <p class="px-3 text-[0.65rem] font-black text-white/40 uppercase tracking-widest mb-3">Principal</p>
+
+                    <a href="#dashboard"
+                        class="sidebar-link flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white active">
+                        <i class="fas fa-tachometer-alt w-5 text-center text-lg drop-shadow-sm"></i>
+                        <span class="font-medium text-[0.95rem]">Dashboard General</span>
+                    </a>
+                    <a href="#mapas"
+                        class="sidebar-link flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white">
+                        <i class="fas fa-map w-5 text-center text-lg drop-shadow-sm"></i>
+                        <span class="font-medium text-[0.95rem]">Mapas y Lotes</span>
+                    </a>
+                    <a href="#estadisticas"
+                        class="sidebar-link flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white">
+                        <i class="fas fa-chart-line w-5 text-center text-lg drop-shadow-sm"></i>
+                        <span class="font-medium text-[0.95rem]">Estadísticas</span>
+                    </a>
+                    <a href="#sensores"
+                        class="sidebar-link flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white">
+                        <i class="fas fa-thermometer-half w-5 text-center text-lg drop-shadow-sm"></i>
+                        <span class="font-medium text-[0.95rem]">Sensores Clima</span>
+                    </a>
+                    <a href="#configuracion"
+                        class="sidebar-link flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white mt-6">
+                        <i class="fas fa-cog w-5 text-center text-lg drop-shadow-sm"></i>
+                        <span class="font-medium text-[0.95rem]">Ajustes</span>
+                    </a>
+                </nav>
+
+                <div
+                    class="p-4 border-t border-white/10 m-4 rounded-2xl bg-black/15 backdrop-blur-md shadow-inner border border-white/5">
+                    <div class="flex items-center gap-3">
+                        <button id="user-menu-side"
+                            class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a5d1a] to-[#2e7d32] border-[1.5px] border-[#FFC107] flex items-center justify-center text-white shadow-md transition-transform hover:scale-105 shrink-0">
+                            <i class="fas fa-user text-sm"></i>
+                        </button>
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-[0.9rem] font-bold text-white truncate shadow-sm">Usuario <span
+                                    id="user-role-display-side"></span></p>
+                            <p class="text-xs text-[#FFC107] font-medium truncate mt-0.5"><i
+                                    class="fas fa-circle text-[0.5rem] mr-1 mb-0.5 align-middle"></i>En línea</p>
                         </div>
                     </div>
                 </div>
+            </aside>
 
-                <!-- Grid de Cultivos -->
-                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tomate -->
-                    <div class="border border-gray-100 rounded-2xl p-5 hover:border-red-200 hover:shadow-md transition-all group cursor-default">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🍅</div>
-                            <h4 class="text-xl font-bold text-gray-800">Tomate</h4>
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto w-full bg-background scroll-smooth">
+                <!-- Wrapper extra for padding -->
+                <div
+                    class="p-4 md:p-6 lg:p-8 pt-safe-top pb-safe-bottom w-full max-w-full mx-auto flex-grow flex flex-col relative">
+                    <header
+                        class="flex items-center justify-between mb-8 bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-gray-100 shadow-sm">
+                        <div class="flex items-center">
+                            <!-- Hamburger Icon for Mobile -->
+                            <button id="open-sidebar-btn"
+                                class="md:hidden w-10 h-10 flex flex-col justify-center items-center text-primary hover:bg-green-50 rounded-xl mr-3 transition-colors shadow-sm border border-green-100 bg-white"
+                                onclick="toggleSidebar()">
+                                <i class="fas fa-bars text-lg"></i>
+                            </button>
+                            
+                            <!-- Hidden elements strictly to preserve JS logic -->
+                            <button id="back-to-login" class="hidden"></button>
+                            <span id="connection-status" class="hidden">Conectado</span>
+                            <span id="user-role-display" class="hidden"></span>
+                            <button id="user-menu" class="hidden"></button>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-red-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-thermometer-half text-orange-500 w-4"></i> Temp:</span>
-                                <span class="font-bold text-gray-800">20°C - 30°C</span>
+
+                        <div class="flex items-center space-x-4 ml-auto">
+                            <button id="open-crop-guide-btn"
+                                class="px-4 py-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-sm font-semibold transition-colors border border-emerald-200 flex items-center gap-2 shadow-sm whitespace-nowrap"
+                                title="Buscador de Cultivos">
+                                <i class="fas fa-search text-emerald-600"></i> <span class="hidden sm:inline">Buscador de Cultivos</span>
+                            </button>
+                            <button id="test-slack-btn"
+                                class="hidden p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-xl text-xs font-bold transition-colors">
+                                <i class="fas fa-bell mr-1"></i> Probar Alerta
+                            </button>
+                            <button id="refresh-data" class="w-10 h-10 flex items-center justify-center text-primary bg-white hover:bg-gray-50 border border-gray-200 rounded-xl shadow-sm transition-colors"
+                                title="Sincronizar Datos">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </header>
+
+                    <main>
+                        <!-- Información de la finca -->
+                        <div class="card bg-card p-5 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <div class="flex items-center gap-3">
+                                        <h2 id="farm-name" class="text-lg font-semibold text-primary">Finca Principal
+                                        </h2>
+                                        <button id="edit-farm-btn">Editar Finca</button>
+                                    </div>
+                                    <p class="text-sm text-text-light mt-1">Cultivo: Maíz • Sector: Norte</p>
+                                </div>
+                                <span class="px-3 py-1 bg-green-100 text-primary rounded-full text-sm font-medium">
+                                    <i class="fas fa-check-circle mr-1"></i> Activo
+                                </span>
                             </div>
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-red-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-tint text-blue-500 w-4"></i> Humedad:</span>
-                                <span class="font-bold text-gray-800">60% - 80%</span>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <p class="text-sm text-text-light">Área total</p>
+                                    <p class="font-semibold">5.2 ha</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-text-light">Última siembra</p>
+                                    <p class="font-semibold">15 Mar 2024</p>
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-red-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-vial text-purple-500 w-4"></i> pH:</span>
-                                <span class="font-bold text-gray-800">6.0 - 6.8</span>
+                        </div>
+
+                        <!-- Formulario Añadir Sensor/Parcela -->
+                        <div class="add-sensor-form tracking-wide">
+                            <h3>Configurar Nuevo Sensor</h3>
+                            <form id="sensor-form">
+                                <div class="form-group">
+                                    <label for="plot-name">Nombre de la Parcela</label>
+                                    <input type="text" id="plot-name" placeholder="Ej: Sector Variante" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="crop-type">Tipo de Cultivo</label>
+                                    <input type="text" id="crop-type" placeholder="Ej: Tomate Cherry" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="metric-type">Métrica a Medir</label>
+                                    <select id="metric-type" required>
+                                        <option value="Humedad">Humedad (%)</option>
+                                        <option value="Temperatura">Temperatura (°C)</option>
+                                        <option value="pH">Nivel de pH</option>
+                                        <option value="Luz">Luz (lux)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ideal-value">Valor Ideal</label>
+                                    <input type="number" id="ideal-value" placeholder="Ej: 60 (humedad) o 25 (temp)"
+                                        step="0.1" required>
+                                </div>
+                                <button type="submit" class="btn-add-sensor">➕ Añadir Sensor</button>
+                            </form>
+                        </div>
+
+                        <!-- Contenedor vacío donde la lógica JS pintará las tarjetas -->
+                        <div id="contenedorSensores" class="mb-8 font-sans"></div>
+
+                        <!-- Tarjetas de sensores -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold text-primary">Datos en Tiempo Real</h2>
+                                <div class="flex items-center text-sm text-text-light">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    <span id="last-update">Actualizando...</span>
+                                </div>
                             </div>
+
+                            <div id="sensor-cards-container" class="grid grid-cols-1 gap-4">
+                                <!-- Las tarjetas se generarán dinámicamente desde JavaScript -->
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <!-- Historial de datos -->
+                            <div class="card bg-card p-5 h-full">
+                                <h2 class="text-lg font-semibold text-primary mb-4">Historial Reciente Simulador</h2>
+                                <div id="history-container" class="space-y-3">
+                                    <!-- Los registros históricos se generarán dinámicamente -->
+                                </div>
+                            </div>
+
+                            <!-- Estado del sistema -->
+                            <div class="card bg-card p-5 h-full">
+                                <h2 class="text-lg font-semibold text-primary mb-4">Estado del Sistema</h2>
+                                <div id="system-status-container" class="space-y-3">
+                                    <!-- Los estados del sistema se generarán dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Historial de Sensores (Filtro por Fechas y Sensor) -->
+                        <div class="card bg-card p-5 mb-6">
+                            <h2 class="text-lg font-semibold text-primary mb-4">Historial y Análisis de Sensores</h2>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-text-light mb-1">Fecha de
+                                        Inicio</label>
+                                    <input type="date" id="history-start-date" class="input-field w-full px-3 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-text-light mb-1">Fecha Fin</label>
+                                    <input type="date" id="history-end-date" class="input-field w-full px-3 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-text-light mb-1">Métrica
+                                        (Sensor)</label>
+                                    <select id="history-sensor-filter" class="input-field w-full px-3 py-2">
+                                        <option value="Todos">Ambos (Temp y Humedad)</option>
+                                        <option value="Temperatura">Solo Temperatura</option>
+                                        <option value="Humedad">Solo Humedad</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-end">
+                                    <button id="filter-history-btn"
+                                        class="btn-primary w-full py-2 h-[42px] text-white font-semibold shadow-md whitespace-nowrap px-2 text-sm">
+                                        <i class="fas fa-search mr-1"></i>Filtrar y Analizar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Mensaje de estado -->
+                            <p id="history-status-message" class="text-center text-text-light italic mb-4">
+                                Selecciona fechas y un sensor para analizar el historial
+                            </p>
+
+                            <!-- Resumen de Medias (Oculto por defecto) -->
+                            <div id="history-summary"
+                                class="hidden mb-4 p-4 bg-green-50 text-green-900 rounded-lg border border-green-200 shadow-sm flex items-center justify-between">
+                                <!-- Promedios inyectados por JS -->
+                            </div>
+
+                            <!-- Tabla de resultados -->
+                            <div class="overflow-x-auto hidden" id="history-table-container">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr id="history-table-head"
+                                            class="bg-green-50 text-primary border-b-2 border-green-200">
+                                            <th class="p-3 font-semibold text-sm">Fecha</th>
+                                            <th class="p-3 font-semibold text-sm">Finca</th>
+                                            <th id="th-temperatura" class="p-3 font-semibold text-center text-sm">
+                                                Temperatura
+                                            </th>
+                                            <th id="th-humedad" class="p-3 font-semibold text-center text-sm">Humedad
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body" class="divide-y divide-gray-100">
+                                        <!-- Filas dinámicas -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </main>
+
+                    <footer class="mt-8 pt-6 border-t border-gray-200 pb-6">
+                        <div class="text-center flex flex-col items-center">
+                            <p class="text-sm text-text-light mb-2">
+                                <i class="fas fa-cloud mr-1"></i>
+                                Sincronización de Datos
+                            </p>
+                            <div
+                                class="flex items-center justify-center gap-3 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm mt-1">
+                                <label for="refresh-interval-select" class="text-xs font-medium text-text-light">
+                                    <i class="fas fa-sync-alt mr-1"></i> Actualización:
+                                </label>
+                                <select id="refresh-interval-select"
+                                    class="text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-primary outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 cursor-pointer transition-all">
+                                    <option value="5000">Cada 5 segundos</option>
+                                    <option value="15000">Cada 15 segundos</option>
+                                    <option value="30000" selected>Cada 30 segundos</option>
+                                    <option value="60000">Cada minuto</option>
+                                    <option value="0">Pausada (Manual)</option>
+                                </select>
+                            </div><!-- end of flex container missing closure -->
+                        </div>
+                    </footer>
+                </div><!-- end max-w-7xl wrapper -->
+            </div><!-- end flex-1 wrapper -->
+        </div><!-- end dashboard-screen flex -->
+
+        <div id="crop-guide-modal"
+            class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60] hidden opacity-0 transition-opacity duration-300">
+            <div
+                class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl transform scale-95 transition-transform duration-300">
+                <!-- Header con gradiente -->
+                <div
+                    class="sticky top-0 z-10 bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 px-6 py-5 rounded-t-3xl flex justify-between items-center shadow-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                            <i class="fas fa-search text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white tracking-tight">Buscador de Cultivos</h3>
+                            <p class="text-emerald-100 text-xs">Encuentra los parámetros ideales para tu cultivo</p>
                         </div>
                     </div>
-
-                    <!-- Maíz -->
-                    <div class="border border-gray-100 rounded-2xl p-5 hover:border-yellow-200 hover:shadow-md transition-all group cursor-default">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🌽</div>
-                            <h4 class="text-xl font-bold text-gray-800">Maíz</h4>
-                        </div>
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-yellow-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-thermometer-half text-orange-500 w-4"></i> Temp:</span>
-                                <span class="font-bold text-gray-800">15°C - 32°C</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-yellow-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-tint text-blue-500 w-4"></i> Humedad:</span>
-                                <span class="font-bold text-gray-800">50% - 70%</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-yellow-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-vial text-purple-500 w-4"></i> pH:</span>
-                                <span class="font-bold text-gray-800">5.8 - 7.0</span>
-                            </div>
-                        </div>
+                    <button id="close-crop-guide-btn"
+                        class="text-white/70 hover:text-white hover:bg-white/20 p-2 rounded-full transition-all duration-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <!-- Panel de Búsqueda y Filtros -->
+                <div class="px-6 pt-5 pb-6 bg-gray-50 border-b border-gray-100">
+                    <div class="relative mb-4">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="search" id="campo-busqueda" placeholder="Escribe el nombre de un cultivo..."
+                            class="w-full pl-11 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-2xl text-base focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-200 shadow-sm placeholder-gray-400" />
                     </div>
 
-                    <!-- Lechuga -->
-                    <div class="border border-gray-100 rounded-2xl p-5 hover:border-green-200 hover:shadow-md transition-all group cursor-default">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🥬</div>
-                            <h4 class="text-xl font-bold text-gray-800">Lechuga</h4>
+                    <!-- Grid de Filtros -->
+                    <div
+                        class="grid grid-cols-2 lg:grid-cols-4 gap-3 bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100/50">
+                        <!-- Ciclo -->
+                        <div class="flex flex-col gap-1.5">
+                            <label
+                                class="text-[0.65rem] font-bold text-emerald-800 uppercase tracking-widest pl-1">Ciclo
+                                de Vida</label>
+                            <select id="filtro-ciclo"
+                                class="bg-white border border-emerald-200 text-sm rounded-xl px-2 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-gray-700 shadow-sm transition-all">
+                                <option value="Todos">Todos</option>
+                                <option value="Anual">Anual</option>
+                                <option value="Bienal">Bienal</option>
+                                <option value="Perenne">Perenne</option>
+                            </select>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-green-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-thermometer-half text-orange-500 w-4"></i> Temp:</span>
-                                <span class="font-bold text-gray-800">15°C - 22°C</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-green-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-tint text-blue-500 w-4"></i> Humedad:</span>
-                                <span class="font-bold text-gray-800">70% - 90%</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-green-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-vial text-purple-500 w-4"></i> pH:</span>
-                                <span class="font-bold text-gray-800">6.0 - 7.0</span>
-                            </div>
+                        <!-- Especie -->
+                        <div class="flex flex-col gap-1.5">
+                            <label
+                                class="text-[0.65rem] font-bold text-emerald-800 uppercase tracking-widest pl-1">Especie</label>
+                            <select id="filtro-especie"
+                                class="bg-white border border-emerald-200 text-sm rounded-xl px-2 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-gray-700 shadow-sm transition-all">
+                                <option value="Todos">Todos</option>
+                                <option value="Cereal">Cereal</option>
+                                <option value="Leguminosa">Leguminosa</option>
+                                <option value="Hortaliza">Hortaliza</option>
+                                <option value="Frutal">Frutal</option>
+                                <option value="Tubérculo">Tubérculo</option>
+                                <option value="Industrial">Industrial</option>
+                                <option value="Forrajero">Forrajero</option>
+                            </select>
+                        </div>
+                        <!-- Método -->
+                        <div class="flex flex-col gap-1.5">
+                            <label
+                                class="text-[0.65rem] font-bold text-emerald-800 uppercase tracking-widest pl-1">Método</label>
+                            <select id="filtro-metodo"
+                                class="bg-white border border-emerald-200 text-sm rounded-xl px-2 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-gray-700 shadow-sm transition-all">
+                                <option value="Todos">Todos</option>
+                                <option value="Secano">Secano</option>
+                                <option value="Regadío">Regadío</option>
+                                <option value="Intensivo">Intensivo</option>
+                                <option value="Extensivo">Extensivo</option>
+                                <option value="Hidropónico">Hidropónico</option>
+                            </select>
+                        </div>
+                        <!-- Uso -->
+                        <div class="flex flex-col gap-1.5">
+                            <label
+                                class="text-[0.65rem] font-bold text-emerald-800 uppercase tracking-widest pl-1">Uso</label>
+                            <select id="filtro-uso"
+                                class="bg-white border border-emerald-200 text-sm rounded-xl px-2 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-gray-700 shadow-sm transition-all">
+                                <option value="Todos">Todos</option>
+                                <option value="Alimentario">Alimentario</option>
+                                <option value="Forrajero">Forrajero</option>
+                                <option value="Industrial">Industrial</option>
+                                <option value="Ornamental">Ornamental</option>
+                            </select>
                         </div>
                     </div>
-
-                    <!-- Patata -->
-                    <div class="border border-gray-100 rounded-2xl p-5 hover:border-amber-200 hover:shadow-md transition-all group cursor-default">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🥔</div>
-                            <h4 class="text-xl font-bold text-gray-800">Patata</h4>
-                        </div>
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-amber-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-thermometer-half text-orange-500 w-4"></i> Temp:</span>
-                                <span class="font-bold text-gray-800">15°C - 20°C</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-amber-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-tint text-blue-500 w-4"></i> Humedad:</span>
-                                <span class="font-bold text-gray-800">50% - 70%</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm bg-gray-50 p-2.5 rounded-lg border border-transparent group-hover:bg-amber-50/50 transition-colors">
-                                <span class="text-gray-600 flex items-center gap-2"><i class="fas fa-vial text-purple-500 w-4"></i> pH:</span>
-                                <span class="font-bold text-gray-800">5.0 - 6.0</span>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+                <!-- Resultados -->
+                <div class="p-6">
+                    <div id="resultados-cultivos" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
                 </div>
             </div>
         </div>
@@ -787,6 +831,51 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Sidebar Toggle Logic
+        function toggleSidebar() {
+            const sidebar = document.getElementById('app-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            // Toggle sidebar translation
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // Open sidebar
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                // Small delay to allow display block before opacity transition
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    overlay.classList.add('opacity-100');
+                }, 10);
+            } else {
+                // Close sidebar
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.remove('opacity-100');
+                overlay.classList.add('opacity-0');
+                // Wait for opacity transition before hiding
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        // Active Link handling
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+
+                    if (window.innerWidth < 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+        });
+    </script>
 
     <script>
         // ==================== VARIABLES DE ESTADO ====================
@@ -1059,7 +1148,7 @@
             const newHistory = {
                 time: timeString,
                 sensor: ["Humedad", "Temperatura", "pH", "Luz"][Math.floor(Math.random() * 4)],
-                value: `${sensorData[Math.floor(Math.random() * sensorData.length)].value}${sensorData[0].unit}`,
+                value: `${sensorData[Math.floor(MathData.length)].value}${sensorData[0].unit}`,
                 change: `${Math.random() > 0.5 ? "+" : "-"}${(Math.random() * 2).toFixed(1)}%`
             };
 
@@ -1593,101 +1682,191 @@
                 });
             }
 
-            // ==================== GUÍA DE CULTIVOS ====================
-            const cropGuideBtn = document.getElementById("open-crop-guide-btn");
-            const cropGuideModal = document.getElementById("crop-guide-modal");
-            const closeCropGuideBtn = document.getElementById("close-crop-guide-btn");
-            const magicCropText = document.getElementById("magic-crop-text");
+            // ==================== BUSCADOR DINÁMICO DE CULTIVOS ====================
+            const baseDatosCultivos = [
+                { nombre: "Tomate", tempMin: 18, tempMax: 30, humMin: 60, humMax: 80, phMin: 5.5, phMax: 6.5, icono: "fas fa-seedling", emoji: "🍅", cicloVida: "Anual", especie: "Hortaliza", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Maíz", tempMin: 20, tempMax: 35, humMin: 50, humMax: 70, phMin: 5.8, phMax: 7.0, icono: "fas fa-seedling", emoji: "🌽", cicloVida: "Anual", especie: "Cereal", metodo: "Extensivo", uso: "Industrial" },
+                { nombre: "Lechuga", tempMin: 10, tempMax: 24, humMin: 70, humMax: 90, phMin: 6.0, phMax: 7.2, icono: "fas fa-leaf", emoji: "🥬", cicloVida: "Anual", especie: "Hortaliza", metodo: "Hidropónico", uso: "Alimentario" },
+                { nombre: "Patata", tempMin: 15, tempMax: 25, humMin: 60, humMax: 80, phMin: 5.0, phMax: 6.0, icono: "fas fa-seedling", emoji: "🥔", cicloVida: "Anual", especie: "Tubérculo", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Fresa", tempMin: 15, tempMax: 25, humMin: 70, humMax: 85, phMin: 5.5, phMax: 6.5, icono: "fas fa-seedling", emoji: "🍓", cicloVida: "Perenne", especie: "Frutal", metodo: "Intensivo", uso: "Alimentario" },
+                { nombre: "Zanahoria", tempMin: 12, tempMax: 24, humMin: 60, humMax: 80, phMin: 6.0, phMax: 6.8, icono: "fas fa-carrot", emoji: "🥕", cicloVida: "Bienal", especie: "Hortaliza", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Olivo", tempMin: 15, tempMax: 30, humMin: 40, humMax: 60, phMin: 6.0, phMax: 8.0, icono: "fas fa-tree", emoji: "🫒", cicloVida: "Perenne", especie: "Frutal", metodo: "Secano", uso: "Alimentario" },
+                { nombre: "Vid", tempMin: 12, tempMax: 30, humMin: 50, humMax: 70, phMin: 5.5, phMax: 7.0, icono: "fas fa-wine-bottle", emoji: "🍇", cicloVida: "Perenne", especie: "Frutal", metodo: "Secano", uso: "Industrial" },
+                { nombre: "Pimiento", tempMin: 18, tempMax: 30, humMin: 60, humMax: 80, phMin: 5.5, phMax: 7.0, icono: "fas fa-pepper-hot", emoji: "🌶️", cicloVida: "Anual", especie: "Hortaliza", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Cebolla", tempMin: 12, tempMax: 25, humMin: 60, humMax: 80, phMin: 5.5, phMax: 6.5, icono: "fas fa-seedling", emoji: "🧅", cicloVida: "Bienal", especie: "Hortaliza", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Acelga", tempMin: 10, tempMax: 22, humMin: 70, humMax: 90, phMin: 5.8, phMax: 6.8, icono: "fas fa-leaf", emoji: "🥗", cicloVida: "Anual", especie: "Hortaliza", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Espinaca", tempMin: 10, tempMax: 24, humMin: 70, humMax: 90, phMin: 5.5, phMax: 7.0, icono: "fas fa-leaf", emoji: "🥬", cicloVida: "Anual", especie: "Hortaliza", metodo: "Hidropónico", uso: "Alimentario" },
+                { nombre: "Calabaza", tempMin: 18, tempMax: 30, humMin: 60, humMax: 80, phMin: 5.5, phMax: 7.0, icono: "fas fa-seedling", emoji: "🎃", cicloVida: "Anual", especie: "Hortaliza", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Albahaca", tempMin: 20, tempMax: 30, humMin: 60, humMax: 80, phMin: 5.5, phMax: 6.5, icono: "fas fa-leaf", emoji: "🌿", cicloVida: "Anual", especie: "Hortaliza", metodo: "Hidropónico", uso: "Ornamental" },
+                { nombre: "Rúcula", tempMin: 10, tempMax: 22, humMin: 70, humMax: 90, phMin: 5.5, phMax: 7.0, icono: "fas fa-leaf", emoji: "🥬", cicloVida: "Anual", especie: "Hortaliza", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Pepino", tempMin: 18, tempMax: 30, humMin: 70, humMax: 90, phMin: 5.5, phMax: 7.0, icono: "fas fa-seedling", emoji: "🥒", cicloVida: "Anual", especie: "Hortaliza", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Berenjena", tempMin: 20, tempMax: 32, humMin: 60, humMax: 80, phMin: 5.5, phMax: 6.5, icono: "fas fa-seedling", emoji: "🍆", cicloVida: "Anual", especie: "Hortaliza", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Sandía", tempMin: 22, tempMax: 35, humMin: 60, humMax: 80, phMin: 5.8, phMax: 6.8, icono: "fas fa-seedling", emoji: "🍉", cicloVida: "Anual", especie: "Frutal", metodo: "Regadío", uso: "Alimentario" },
+                { nombre: "Cacao", tempMin: 18, tempMax: 32, humMin: 70, humMax: 90, phMin: 5.0, phMax: 6.5, icono: "fas fa-tree", emoji: "🍫", cicloVida: "Perenne", especie: "Frutal", metodo: "Intensivo", uso: "Industrial" },
+                { nombre: "Trigo", tempMin: 15, tempMax: 25, humMin: 50, humMax: 70, phMin: 6.0, phMax: 7.5, icono: "fas fa-seedling", emoji: "🌾", cicloVida: "Anual", especie: "Cereal", metodo: "Secano", uso: "Alimentario" },
+                { nombre: "Algodón", tempMin: 20, tempMax: 30, humMin: 60, humMax: 80, phMin: 5.5, phMax: 6.5, icono: "fas fa-seedling", emoji: "☁️", cicloVida: "Anual", especie: "Industrial", metodo: "Regadío", uso: "Industrial" },
+                { nombre: "Alfalfa", tempMin: 10, tempMax: 25, humMin: 60, humMax: 80, phMin: 6.2, phMax: 7.5, icono: "fas fa-leaf", emoji: "🌱", cicloVida: "Perenne", especie: "Forrajero", metodo: "Regadío", uso: "Forrajero" }
+            ];
 
-            if (cropGuideBtn && cropGuideModal) {
-                // Función Mágica
-                const analyzeCurrentConditions = () => {
-                    const tempObj = sensorData.find(s => s.id === "air-temperature");
-                    const humObj = sensorData.find(s => s.id === "soil-moisture");
-                    
-                    if (!tempObj || !humObj) return;
+            // Normalizar texto (ignora mayúsculas y tildes)
+            function normalizar(texto) {
+                return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            }
 
-                    const currentTemp = tempObj.value;
-                    const currentHum = humObj.value;
+            // Renderizar tarjetas de cultivos con diseño premium y badges
+            function dibujarResultados(lista, esBusquedaActiva) {
+                const contenedor = document.getElementById("resultados-cultivos");
+                contenedor.innerHTML = "";
 
-                    // Condiciones Ideales
-                    const crops = [
-                        { name: "Tomates 🍅", minTemp: 20, maxTemp: 30, minHum: 60, maxHum: 80 },
-                        { name: "Maíz 🌽", minTemp: 15, maxTemp: 32, minHum: 50, maxHum: 70 },
-                        { name: "Lechugas 🥬", minTemp: 15, maxTemp: 22, minHum: 70, maxHum: 90 },
-                        { name: "Patatas 🥔", minTemp: 15, maxTemp: 20, minHum: 50, maxHum: 70 }
-                    ];
+                // Sin resultados y con filtros activos
+                if (lista.length === 0 && esBusquedaActiva) {
+                    contenedor.innerHTML = `
+                        <div class="sm:col-span-2 lg:col-span-3 text-center py-8">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-amber-50 rounded-full mb-4">
+                                <i class="fas fa-exclamation-circle text-2xl text-amber-400"></i>
+                            </div>
+                            <p class="text-gray-600 font-semibold mb-2">No hay cultivos que coincidan con estos filtros</p>
+                            <p class="text-xs text-gray-400">Prueba a ajustar tus criterios de búsqueda</p>
+                        </div>`;
+                    return;
+                }
 
-                    const perfectMatches = crops.filter(crop => 
-                        currentTemp >= crop.minTemp && currentTemp <= crop.maxTemp &&
-                        currentHum >= crop.minHum && currentHum <= crop.maxHum
-                    );
+                // Sin búsqueda ni filtros: mensaje inicial o todos (aquí optamos por mostrar todos si se entra sin filtros)
+                if (lista.length === 0 && !esBusquedaActiva) {
+                    contenedor.innerHTML = `
+                        <div class="sm:col-span-2 lg:col-span-3 text-center py-10">
+                            <i class="fas fa-filter text-4xl text-emerald-100 mb-4"></i>
+                            <p class="text-gray-500">Usa el buscador o los filtros para encontrar un cultivo</p>
+                        </div>`;
+                    return;
+                }
 
-                    let msg = `💡 Tu temperatura actual (<strong>${currentTemp}°C</strong>) y humedad (<strong>${currentHum}%</strong>) `;
-                    
-                    if (perfectMatches.length > 0) {
-                        const cropNames = perfectMatches.map(c => c.name).join(" y ");
-                        msg += `son <span class="text-teal-600 font-bold uppercase">ideales</span> para cultivar ${cropNames}.`;
-                    } else {
-                        // Encontrar el cultivo más cercano por temperatura
-                        let closestCrop = crops[0];
-                        let minDiff = 999;
-                        crops.forEach(crop => {
-                            let diff = 0;
-                            if (currentTemp < crop.minTemp) diff = crop.minTemp - currentTemp;
-                            else if (currentTemp > crop.maxTemp) diff = currentTemp - crop.maxTemp;
+                // Renderizar tarjetas
+                lista.forEach(c => {
+                    const tarjeta = document.createElement("div");
+                    tarjeta.className = "group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden";
+                    tarjeta.innerHTML = `
+                        <div class="h-1.5 bg-gradient-to-r from-emerald-400 via-green-500 to-teal-500"></div>
+                        <div class="p-5">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="text-3xl">${c.emoji}</span>
+                                <div>
+                                    <h4 class="font-bold text-gray-800 text-lg leading-tight">${c.nombre}</h4>
+                                    <p class="text-xs text-gray-400">Parámetros ideales</p>
+                                </div>
+                            </div>
                             
-                            if (diff < minDiff) { minDiff = diff; closestCrop = crop; }
-                        });
-                        msg += `no son perfectas ahora mismo, pero estás muy cerca de poder cultivar <strong>${closestCrop.name}</strong>. Intenta ${currentTemp < closestCrop.minTemp ? "subir" : "bajar"} un poco la temperatura y revisar la humedad.`;
-                    }
-                    
-                    if (magicCropText) magicCropText.innerHTML = msg;
-                };
+                            <!-- Parámetros Agronómicos -->
+                            <div class="grid grid-cols-1 gap-2">
+                                <div class="flex items-center justify-between bg-orange-50/70 p-2 rounded-lg text-[0.75rem]">
+                                    <span class="text-orange-700 font-semibold"><i class="fas fa-thermometer-half mr-2"></i>Temp.</span>
+                                    <span class="font-bold text-gray-700">${c.tempMin}°C - ${c.tempMax}°C</span>
+                                </div>
+                                <div class="flex items-center justify-between bg-blue-50/70 p-2 rounded-lg text-[0.75rem]">
+                                    <span class="text-blue-700 font-semibold"><i class="fas fa-tint mr-2"></i>Hum.</span>
+                                    <span class="font-bold text-gray-700">${c.humMin}% - ${c.humMax}%</span>
+                                </div>
+                                <div class="flex items-center justify-between bg-purple-50/70 p-2 rounded-lg text-[0.75rem]">
+                                    <span class="text-purple-700 font-semibold"><i class="fas fa-vial mr-2"></i>pH</span>
+                                    <span class="font-bold text-gray-700">${c.phMin} - ${c.phMax}</span>
+                                </div>
+                            </div>
 
-                const openModal = () => {
-                    analyzeCurrentConditions(); // Disparar la magia al abrir
-                    cropGuideModal.classList.remove("hidden");
-                    // Timeout para la transición de opacidad (Tailwind)
-                    setTimeout(() => {
-                        cropGuideModal.classList.remove("opacity-0");
-                        cropGuideModal.children[0].classList.remove("scale-95");
-                        cropGuideModal.children[0].classList.add("scale-100");
-                    }, 10);
-                };
-
-                const closeModal = () => {
-                    cropGuideModal.classList.add("opacity-0");
-                    cropGuideModal.children[0].classList.remove("scale-100");
-                    cropGuideModal.children[0].classList.add("scale-95");
-                    setTimeout(() => {
-                        cropGuideModal.classList.add("hidden");
-                    }, 300);
-                };
-
-                cropGuideBtn.addEventListener("click", openModal);
-                closeCropGuideBtn.addEventListener("click", closeModal);
-                
-                // Cerrar al clickear fuera
-                cropGuideModal.addEventListener("click", (e) => {
-                    if(e.target === cropGuideModal) closeModal();
+                            <!-- Badges de Categoría (Algoritmo de clasificación estético) -->
+                            <div class="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-gray-100">
+                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[0.6rem] font-bold rounded-md uppercase tracking-wider shadow-sm">${c.cicloVida}</span>
+                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[0.6rem] font-bold rounded-md uppercase tracking-wider shadow-sm">${c.especie}</span>
+                                <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[0.6rem] font-bold rounded-md uppercase tracking-wider shadow-sm">${c.metodo}</span>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-700 text-[0.6rem] font-bold rounded-md uppercase tracking-wider shadow-sm">${c.uso}</span>
+                            </div>
+                        </div>
+                    `;
+                    contenedor.appendChild(tarjeta);
                 });
             }
+
+            // Lógica Maestra de Filtrado Multicriterio
+            (function initAdvancedCropSearch() {
+                const searchInput = document.getElementById("campo-busqueda");
+                const selectCiclo = document.getElementById("filtro-ciclo");
+                const selectEspecie = document.getElementById("filtro-especie");
+                const selectMetodo = document.getElementById("filtro-metodo");
+                const selectUso = document.getElementById("filtro-uso");
+
+                const modal = document.getElementById("crop-guide-modal");
+                const openBtn = document.getElementById("open-crop-guide-btn");
+                const closeBtn = document.getElementById("close-crop-guide-btn");
+
+                function filtrarCultivos() {
+                    const query = normalizar(searchInput.value.trim());
+                    const fCiclo = selectCiclo.value;
+                    const fEspecie = selectEspecie.value;
+                    const fMetodo = selectMetodo.value;
+                    const fUso = selectUso.value;
+
+                    // El filtrado es "activo" si hay algo escrito o algún select no es "Todos"
+                    const esBusquedaActiva = query !== "" || fCiclo !== "Todos" || fEspecie !== "Todos" || fMetodo !== "Todos" || fUso !== "Todos";
+
+                    const filtrados = baseDatosCultivos.filter(c => {
+                        const matchText = query === "" || normalizar(c.nombre).includes(query);
+                        const matchCiclo = fCiclo === "Todos" || c.cicloVida === fCiclo;
+                        const matchEspecie = fEspecie === "Todos" || c.especie === fEspecie;
+                        const matchMetodo = fMetodo === "Todos" || c.metodo === fMetodo;
+                        const matchUso = fUso === "Todos" || c.uso === fUso;
+
+                        // Algoritmo de intersección lógica (AND)
+                        return matchText && matchCiclo && matchEspecie && matchMetodo && matchUso;
+                    });
+
+                    dibujarResultados(filtrados, esBusquedaActiva);
+                }
+
+                // Event Listeners
+                [searchInput].forEach(el => el.addEventListener("input", filtrarCultivos));
+                [selectCiclo, selectEspecie, selectMetodo, selectUso].forEach(el => el.addEventListener("change", filtrarCultivos));
+
+                // Control del Modal
+                if (openBtn && closeBtn && modal) {
+                    openBtn.addEventListener("click", () => {
+                        modal.classList.remove("hidden");
+                        requestAnimationFrame(() => {
+                            modal.classList.remove("opacity-0");
+                            modal.querySelector("div").classList.remove("scale-95");
+                            modal.querySelector("div").classList.add("scale-100");
+                        });
+                        // Reset inicial
+                        searchInput.value = "";
+                        [selectCiclo, selectEspecie, selectMetodo, selectUso].forEach(s => s.value = "Todos");
+                        dibujarResultados([], false);
+                        setTimeout(() => searchInput.focus(), 100);
+                    });
+
+                    const cerrar = () => {
+                        modal.classList.add("opacity-0");
+                        modal.querySelector("div").classList.remove("scale-100");
+                        modal.querySelector("div").classList.add("scale-95");
+                        setTimeout(() => modal.classList.add("hidden"), 300);
+                    };
+
+                    closeBtn.addEventListener("click", cerrar);
+                    modal.addEventListener("click", (e) => { if (e.target === modal) cerrar(); });
+                }
+            })();
         });
 
         // ==================== ACTUALIZACIÓN AUTOMÁTICA ====================
         let refreshInterval;
         let currentRefreshRate = 30000;
-        
+
         const intervalSelect = document.getElementById("refresh-interval-select");
         if (intervalSelect) {
-            intervalSelect.addEventListener("change", function(e) {
+            intervalSelect.addEventListener("change", function (e) {
                 currentRefreshRate = parseInt(e.target.value, 10);
-                
+
                 // Si el usuario está actualmente en el Dashboard, aplicamos de inmediato
                 if (document.getElementById("dashboard-screen").classList.contains("active")) {
                     stopAutoRefresh(false); // Detiene el intervalo anterior sin cambiar UI de Desconectado si va a reiniciar
-                    
+
                     if (currentRefreshRate > 0) {
                         startAutoRefresh();
                     } else {
@@ -1705,10 +1884,10 @@
 
         function startAutoRefresh() {
             if (refreshInterval) clearInterval(refreshInterval);
-            
+
             if (currentRefreshRate > 0) {
                 refreshInterval = setInterval(simulateGoogleSheetsData, currentRefreshRate);
-                console.log(`Actualización iniciada cada ${currentRefreshRate/1000}s`);
+                console.log(`Actualización iniciada cada ${currentRefreshRate / 1000}s`);
 
                 const statusEl = document.getElementById("connection-status");
                 if (statusEl) {
@@ -1721,7 +1900,7 @@
 
         function stopAutoRefresh(forceUiDisconnect = true) {
             if (refreshInterval) clearInterval(refreshInterval);
-            
+
             if (forceUiDisconnect) {
                 const statusEl = document.getElementById("connection-status");
                 if (statusEl) {
