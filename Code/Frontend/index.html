@@ -10,6 +10,7 @@
     <meta name="theme-color" content="#1a5d1a">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -426,7 +427,7 @@
                         <i class="fas fa-tachometer-alt w-5 text-center text-lg drop-shadow-sm"></i>
                         <span class="font-medium text-[0.95rem]">Dashboard General</span>
                     </a>
-                    <a href="#mapas"
+                    <a href="#parcela"
                         class="sidebar-link flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white">
                         <i class="fas fa-map w-5 text-center text-lg drop-shadow-sm"></i>
                         <span class="font-medium text-[0.95rem]">Mapas y Lotes</span>
@@ -705,15 +706,85 @@
                         </div> <!-- End section-dashboard -->
 
                         <!-- Empty Sections -->
-                        <div id="section-mapas" class="content-section">
-                            <div
-                                class="card bg-card p-8 mb-8 text-center text-text-light flex flex-col items-center justify-center min-h-[400px]">
-                                <i class="fas fa-map text-5xl mb-4 text-gray-300"></i>
-                                <h2 class="text-2xl font-semibold text-primary">Mapas y Lotes</h2>
-                                <p class="mt-2 text-gray-500">Esta sección aún no tiene contenido. Próximamente
-                                    disponible.</p>
-                            </div>
-                        </div>
+                        <section id="section-parcela" class="content-section bg-white rounded-3xl shadow-sm p-4 md:p-8">
+<div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+        <div>
+            <h2 class="text-2xl font-black text-gray-800">Mapa de Dispositivos 3D</h2>
+            <p class="text-gray-500 text-sm">Optimización de cobertura por IA</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btn-optimizar-ia" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold transition-all">
+                <i class="fas fa-magic mr-2"></i> Optimizar Ubicaciones
+            </button>
+            <button id="btn-refresh-parcela" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition-all">
+                <i class="fas fa-sync-alt mr-2"></i> Refrescar Parcelas
+            </button>
+        </div>
+    </div>
+
+    <div id="parcela-metrics" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <h4 class="text-xs font-semibold text-gray-500 uppercase">Sensores reales</h4>
+            <p id="total-sensores" class="text-2xl font-bold text-green-700">0</p>
+        </div>
+        <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <h4 class="text-xs font-semibold text-gray-500 uppercase">Sensores 3D</h4>
+            <p id="total-sensores-mapa" class="text-2xl font-bold text-blue-700">0</p>
+        </div>
+        <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <h4 class="text-xs font-semibold text-gray-500 uppercase">Temperatura</h4>
+            <p id="total-temperatura" class="text-2xl font-bold text-orange-600">0</p>
+        </div>
+        <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <h4 class="text-xs font-semibold text-gray-500 uppercase">Humedad</h4>
+            <p id="total-humedad" class="text-2xl font-bold text-blue-600">0</p>
+        </div>
+        <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <h4 class="text-xs font-semibold text-gray-500 uppercase">pH / Luz</h4>
+            <p id="total-ph-luz" class="text-2xl font-bold text-purple-600">0</p>
+        </div>
+    </div>
+
+    <div id="canvas-3d-container" class="w-full h-[500px] bg-gray-100 rounded-2xl overflow-hidden shadow-inner"></div>
+
+    <div id="legend-container" class="mt-4 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">Leyenda</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-3 h-3 rounded-full bg-green-500"></span>
+                <span class="text-sm">Sensor Normal</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-3 h-3 rounded-full bg-yellow-500"></span>
+                <span class="text-sm">Sensor Cuidado</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-3 h-3 rounded-full bg-red-500"></span>
+                <span class="text-sm">Sensor Atención</span>
+            </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2">Zonas de cultivo</h4>
+                <ul class="text-sm text-gray-600 space-y-2">
+                    <li><span class="inline-block w-2 h-2 mr-2 rounded-full bg-red-500"></span>Sector A: Tomate</li>
+                    <li><span class="inline-block w-2 h-2 mr-2 rounded-full bg-yellow-500"></span>Sector B: Maíz</li>
+                    <li><span class="inline-block w-2 h-2 mr-2 rounded-full bg-green-500"></span>Sector C: Lechuga</li>
+                    <li><span class="inline-block w-2 h-2 mr-2 rounded-full bg-blue-500"></span>Sector D: Pimiento</li>
+                </ul>
+            </div>
+            <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
+                <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2">Leyenda de estado de sensores</h4>
+                <div class="space-y-1 text-sm">
+                    <div class="flex items-center"><span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>Normal</div>
+                    <div class="flex items-center"><span class="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>Precaución</div>
+                    <div class="flex items-center"><span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>Alerta</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
                         <div id="section-estadisticas" class="content-section">
                             <div
                                 class="card bg-card p-8 mb-8 text-center text-text-light flex flex-col items-center justify-center min-h-[400px]">
@@ -1223,10 +1294,12 @@
             });
 
             // Actualizar historial
+            const historySensorIndex = Math.floor(Math.random() * sensorData.length);
+            const selectedSensor = sensorData[historySensorIndex];
             const newHistory = {
                 time: timeString,
                 sensor: ["Humedad", "Temperatura", "pH", "Luz"][Math.floor(Math.random() * 4)],
-                value: `${sensorData[Math.floor(MathData.length)].value}${sensorData[0].unit}`,
+                value: `${selectedSensor.value} ${selectedSensor.unit || ''}`,
                 change: `${Math.random() > 0.5 ? "+" : "-"}${(Math.random() * 2).toFixed(1)}%`
             };
 
@@ -1796,6 +1869,11 @@
                 const contenedor = document.getElementById("resultados-cultivos");
                 contenedor.innerHTML = "";
 
+                // Si se solicita mostrar todos, forzamos list completo cuando no hay búsqueda
+                if (!esBusquedaActiva && lista.length === 0) {
+                    lista = baseDatosCultivos.slice(0, 12); // favoritos/inicial
+                }
+
                 // Sin resultados y con filtros activos
                 if (lista.length === 0 && esBusquedaActiva) {
                     contenedor.innerHTML = `
@@ -1903,6 +1981,9 @@
                 [searchInput].forEach(el => el.addEventListener("input", filtrarCultivos));
                 [selectCiclo, selectEspecie, selectMetodo, selectUso].forEach(el => el.addEventListener("change", filtrarCultivos));
 
+                // Mostrar resultados iniciales de cultivos
+                filtrarCultivos();
+
                 // Control del Modal
                 if (openBtn && closeBtn && modal) {
                     openBtn.addEventListener("click", () => {
@@ -1989,6 +2070,13 @@
                             }
                         });
 
+                        // Iniciar mapa 3D en la sección de parcela/mapas
+                        if (sectionId === 'section-parcela' || targetId === '#parcela' || targetId === '#mapas') {
+                            if (typeof init3DMap === 'function') {
+                                init3DMap();
+                            }
+                        }
+
                         if (window.innerWidth < 768 && typeof window.toggleSidebar === 'function') {
                             window.toggleSidebar();
                         }
@@ -1997,6 +2085,320 @@
             });
 
         });
+
+        // ==================== MUNDO 3D PARA PARCELA ====================
+        let scene3D = null;
+        let sceneRoot = null;
+        let camera3D = null;
+        let renderer3D = null;
+        let sensores3D = [];
+        let zonas3D = [];
+        let zoneGroup = null;
+        const parcelasCultivo = [
+            { nombre: 'Tomate', color: 0xff6347, x: -20, z: -10, ancho: 24, alto: 18 },
+            { nombre: 'Maíz', color: 0xffd700, x: 20, z: -10, ancho: 24, alto: 18 },
+            { nombre: 'Lechuga', color: 0x32cd32, x: -20, z: 10, ancho: 24, alto: 18 },
+            { nombre: 'Pimiento', color: 0x1e90ff, x: 20, z: 10, ancho: 24, alto: 18 }
+        ];
+        let map3DInitialized = false;
+
+        function init3DMap() {
+            console.log('init3DMap() llamado');
+            const container = document.getElementById('canvas-3d-container');
+            if (!container) {
+                console.warn('No se encontró el contenedor 3D');
+                return;
+            }
+
+            container.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-500">Iniciando motor 3D...</div>';
+
+            if (map3DInitialized) {
+                console.log('Mapa 3D ya inicializado.');
+                return;
+            }
+
+            if (typeof THREE === 'undefined' || !THREE.WebGLRenderer) {
+                container.innerHTML = '<div class="w-full h-full p-4 text-center text-red-500">WebGL no está disponible o Three.js no se cargó.</div>';
+                console.error('Three.js no disponible.');
+                return;
+            }
+
+            if (typeof THREE.WEBGL !== 'undefined' && !THREE.WEBGL.isWebGLAvailable()) {
+                container.innerHTML = '<div class="w-full h-full p-4 text-center text-red-500">WebGL no está disponible en este navegador.</div>';
+                console.error('WebGL no disponible.');
+                return;
+            }
+
+            // No marcar inicializado hasta que la escena se configure correctamente
+            map3DInitialized = false;
+
+            try {
+                scene3D = new THREE.Scene();
+                scene3D.background = new THREE.Color(0xf2f7f9);
+
+                const width = container.clientWidth || 800;
+                const height = container.clientHeight || 500;
+
+                camera3D = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+                camera3D.position.set(0, 80, 120);
+
+                renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer3D.setPixelRatio(window.devicePixelRatio || 1);
+                renderer3D.setSize(width, height);
+                renderer3D.setClearColor(0x0f172a, 1);
+                container.style.backgroundColor = '#0f172a';
+                container.style.position = 'relative';
+                container.innerHTML = '';
+                container.appendChild(renderer3D.domElement);
+
+                camera3D.lookAt(new THREE.Vector3(0, 0, 0));
+            } catch (error) {
+                map3DInitialized = false;
+                container.innerHTML = '<div class="w-full h-full p-4 text-center text-red-500">Error inicializando Three.js: ' + error.message + '</div>';
+                console.error('Error init3DMap:', error);
+                return;
+            }
+
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            scene3D.add(ambient);
+
+            const directional = new THREE.DirectionalLight(0xffffff, 0.6);
+            directional.position.set(80, 120, 100);
+            scene3D.add(directional);
+
+            sceneRoot = new THREE.Group();
+            scene3D.add(sceneRoot);
+
+            const grid = new THREE.GridHelper(80, 16, 0x888888, 0xcccccc);
+            sceneRoot.add(grid);
+
+            const axes = new THREE.AxesHelper(20);
+            sceneRoot.add(axes);
+
+            const ground = new THREE.Mesh(
+                new THREE.PlaneGeometry(80, 60),
+                new THREE.MeshPhongMaterial({ color: 0x8cc56d, opacity: 0.35, transparent: true })
+            );
+            ground.rotation.x = -Math.PI / 2;
+            sceneRoot.add(ground);
+
+            // Marcar inicializado después de creación exitosa de la escena 3D.
+            map3DInitialized = true;
+
+            // Crear zonas de cultivo visualmente en la parcela
+            crearZonasCultivo();
+
+            let isPointerDown = false;
+            let pointerPrevX = 0;
+            let pointerPrevY = 0;
+            let rotationX = 0;
+            let rotationY = 0;
+
+            renderer3D.domElement.style.cursor = 'grab';
+
+            renderer3D.domElement.addEventListener('pointerdown', (e) => {
+                isPointerDown = true;
+                pointerPrevX = e.clientX;
+                pointerPrevY = e.clientY;
+                renderer3D.domElement.style.cursor = 'grabbing';
+            });
+
+            renderer3D.domElement.addEventListener('pointermove', (e) => {
+                if (!isPointerDown) return;
+                const deltaX = e.clientX - pointerPrevX;
+                const deltaY = e.clientY - pointerPrevY;
+                pointerPrevX = e.clientX;
+                pointerPrevY = e.clientY;
+
+                rotationY += deltaX * 0.005;
+                rotationX += deltaY * 0.005;
+                rotationX = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, rotationX));
+
+                sceneRoot.rotation.y = rotationY;
+                sceneRoot.rotation.x = rotationX;
+            });
+
+            ['pointerup', 'pointerleave', 'pointercancel'].forEach(event => {
+                renderer3D.domElement.addEventListener(event, () => {
+                    isPointerDown = false;
+                    renderer3D.domElement.style.cursor = 'grab';
+                });
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer3D.render(scene3D, camera3D);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                if (w > 0 && h > 0) {
+                    camera3D.aspect = w / h;
+                    camera3D.updateProjectionMatrix();
+                    renderer3D.setSize(w, h);
+                }
+            });
+
+            const btnOptimizar = document.getElementById('btn-optimizar-ia');
+            if (btnOptimizar) {
+                btnOptimizar.addEventListener('click', () => {
+                    optimizarColocacionIA();
+                    setTimeout(() => {
+                        const msg = document.createElement('div');
+                        msg.className = 'fixed bottom-4 right-4 px-4 py-2 text-white bg-emerald-600 rounded-lg shadow-lg';
+                        msg.textContent = 'Distribución IA actualizada con éxito.';
+                        document.body.appendChild(msg);
+                        setTimeout(() => msg.remove(), 1200);
+                    }, 100);
+                });
+            }
+
+            const btnRefreshParcela = document.getElementById('btn-refresh-parcela');
+            if (btnRefreshParcela) {
+                btnRefreshParcela.addEventListener('click', () => {
+                    simulateGoogleSheetsData();
+                    optimizarColocacionIA();
+                    const msg2 = document.createElement('div');
+                    msg2.className = 'fixed bottom-4 right-4 px-4 py-2 text-white bg-blue-600 rounded-lg shadow-lg';
+                    msg2.textContent = 'Datos y mapa de parcela actualizados.';
+                    document.body.appendChild(msg2);
+                    setTimeout(() => msg2.remove(), 1200);
+                });
+            }
+
+            optimizarColocacionIA();
+        }
+
+        const tiposSensores = [
+            { tipo: 'Temperatura', color: 0xff4500, icono: 'fas fa-thermometer-half' },
+            { tipo: 'Humedad', color: 0x1e90ff, icono: 'fas fa-tint' },
+            { tipo: 'pH', color: 0x9b59b6, icono: 'fas fa-vial' },
+            { tipo: 'Luz', color: 0xf9d74c, icono: 'fas fa-sun' }
+        ];
+
+        function crearSensor3D(x, z, sensorTipo) {
+            if (!scene3D) return;
+
+            const tipo = tiposSensores.find(t => t.tipo === sensorTipo) || tiposSensores[0];
+            const geometry = new THREE.ConeGeometry(1.3, 3.5, 20);
+            const material = new THREE.MeshStandardMaterial({ color: tipo.color, metalness: 0.3, roughness: 0.4 });
+            const sensor = new THREE.Mesh(geometry, material);
+            sensor.position.set(x, 1.75, z);
+            sensor.rotation.x = Math.PI;
+            sensor.userData = { sensorTipo: tipo.tipo };
+
+            const base = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.5, 1.5, 0.3, 20),
+                new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.25, roughness: 0.5 })
+            );
+            base.position.y = -1.75;
+            sensor.add(base);
+
+            if (sceneRoot) {
+                sceneRoot.add(sensor);
+            } else {
+                scene3D.add(sensor);
+            }
+
+            sensores3D.push(sensor);
+        }
+
+        function actualizarEstadisticasParcela() {
+            const totales = { Temperatura: 0, Humedad: 0, pH: 0, Luz: 0 };
+            sensores3D.forEach(s => {
+                const tipo = s.userData.sensorTipo;
+                if (totales[tipo] !== undefined) totales[tipo]++;
+            });
+
+            document.getElementById('total-sensores').textContent = sensorData.length.toString();
+            document.getElementById('total-sensores-mapa').textContent = sensores3D.length.toString();
+            document.getElementById('total-temperatura').textContent = totales.Temperatura.toString();
+            document.getElementById('total-humedad').textContent = totales.Humedad.toString();
+            document.getElementById('total-ph-luz').textContent = (totales.pH + totales.Luz).toString();
+        }
+
+        function crearEtiquetaZona(texto, x, z) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = 'bold 28px Inter, sans-serif';
+            ctx.fillStyle = '#111827';
+            ctx.textAlign = 'center';
+            ctx.fillText(texto, canvas.width / 2, canvas.height / 2 + 10);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.minFilter = THREE.LinearFilter;
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(14, 7, 1);
+            sprite.position.set(x, 2.8, z);
+
+            if (sceneRoot) sceneRoot.add(sprite);
+            else scene3D.add(sprite);
+
+            return sprite;
+        }
+
+        function crearZonasCultivo() {
+            if (!scene3D) return;
+
+            if (zoneGroup) {
+                zoneGroup.children.forEach(child => zoneGroup.remove(child));
+            } else {
+                zoneGroup = new THREE.Group();
+                if (sceneRoot) sceneRoot.add(zoneGroup);
+                else scene3D.add(zoneGroup);
+            }
+
+            parcelasCultivo.forEach(zone => {
+                const plane = new THREE.Mesh(
+                    new THREE.PlaneGeometry(zone.ancho, zone.alto),
+                    new THREE.MeshPhongMaterial({ color: zone.color, opacity: 0.25, transparent: true, side: THREE.DoubleSide })
+                );
+                plane.rotation.x = -Math.PI / 2;
+                plane.position.set(zone.x, 0.05, zone.z);
+                zoneGroup.add(plane);
+
+                crearEtiquetaZona(zone.nombre, zone.x, zone.z);
+            });
+        }
+
+        function optimizarColocacionIA() {
+            if (!scene3D) {
+                init3DMap();
+                return;
+            }
+
+            console.log('IA calculando posiciones óptimas...');
+            const radio = 15;
+            const distancia = radio * 1.33;
+
+            sensores3D.forEach(s => {
+                if (sceneRoot && sceneRoot.children.includes(s)) {
+                    sceneRoot.remove(s);
+                } else {
+                    scene3D.remove(s);
+                }
+            });
+            sensores3D = [];
+
+            let index = 0;
+            for (let x = -30; x <= 30; x += distancia) {
+                for (let z = -20; z <= 20; z += distancia) {
+                    const tipo = tiposSensores[index % tiposSensores.length].tipo;
+                    crearSensor3D(x, z, tipo);
+                    index++;
+                }
+            }
+
+            actualizarEstadisticasParcela();
+        }
 
         // ==================== ACTUALIZACIÓN AUTOMÁTICA ====================
         let refreshInterval;

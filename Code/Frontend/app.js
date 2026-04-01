@@ -409,7 +409,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.classList.add('active');
 
                 // Mostrar la sección correspondiente
-                const sectionId = 'section-' + targetId.substring(1);
+                let sectionId = 'section-' + targetId.substring(1);
+
+                // Alias: '#mapas' ahora apunta a 'section-parcela' porque reemplazamos el contenido.
+                if (targetId === '#mapas') {
+                    sectionId = 'section-parcela';
+                }
+
+                // Alias: '#parcela' también a la misma sección
+                if (targetId === '#parcela') {
+                    sectionId = 'section-parcela';
+                }
+
                 contentSections.forEach(sec => {
                     if (sec.id === sectionId) {
                         sec.classList.add('active');
@@ -417,6 +428,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         sec.classList.remove('active');
                     }
                 });
+
+                // Inicializar el mapa 3D al entrar en parcela/mapas
+                if (sectionId === 'section-parcela') {
+                    if (typeof init3DMap === 'function') {
+                        init3DMap();
+                    }
+                }
 
                 // Si estamos en móvil y toggleSidebar existe, cerrar sidebar
                 if (window.innerWidth < 768 && typeof window.toggleSidebar === 'function') {
@@ -427,3 +445,127 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+
+// ==================== MUNDO 3D PARA PARCELA ====================
+let scene3D = null;
+let camera3D = null;
+let renderer3D = null;
+let sensores3D = [];
+let map3DInitialized = false;
+
+function init3DMap() {
+    const container = document.getElementById('canvas-3d-container');
+    if (!container) {
+        console.warn('No se encontró el contenedor 3D');
+        return;
+    }
+
+    // Evitar múltiples inicializaciones
+    if (map3DInitialized) {
+        console.log('Mapa 3D ya inicializado');
+        return;
+    }
+
+    map3DInitialized = true;
+
+    scene3D = new THREE.Scene();
+    scene3D.background = new THREE.Color(0xf2f7f9);
+
+    const width = container.clientWidth || 800;
+    const height = container.clientHeight || 500;
+
+    camera3D = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera3D.position.set(0, 80, 120);
+
+    renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer3D.setPixelRatio(window.devicePixelRatio || 1);
+    renderer3D.setSize(width, height);
+    container.innerHTML = '';
+    container.appendChild(renderer3D.domElement);
+
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    scene3D.add(ambient);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(80, 120, 100);
+    scene3D.add(directionalLight);
+
+    const gridHelper = new THREE.GridHelper(80, 16, 0x888888, 0xcccccc);
+    scene3D.add(gridHelper);
+
+    const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(80, 60),
+        new THREE.MeshPhongMaterial({ color: 0x8cc56d, opacity: 0.35, transparent: true })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    scene3D.add(ground);
+
+    const animate = function () {
+        requestAnimationFrame(animate);
+        if (renderer3D && camera3D && scene3D) {
+            renderer3D.render(scene3D, camera3D);
+        }
+    };
+    animate();
+
+    window.addEventListener('resize', () => {
+        if (!container || !camera3D || !renderer3D) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera3D.aspect = w / h;
+        camera3D.updateProjectionMatrix();
+        renderer3D.setSize(w, h);
+    });
+
+    // Llamar IA inicialmente para posiciones predeterminadas
+    optimizarColocacionIA();
+
+    // Botón de optimización IA
+    const btnOptimizar = document.getElementById('btn-optimizar-ia');
+    if (btnOptimizar) {
+        btnOptimizar.addEventListener('click', optimizarColocacionIA);
+    }
+}
+
+function crearSensor3D(x, z) {
+    if (!scene3D) return;
+
+    const geometry = new THREE.CylinderGeometry(1.2, 1.2, 4, 16);
+    const material = new THREE.MeshStandardMaterial({ color: 0x1a5d1a, metalness: 0.3, roughness: 0.6 });
+    const sensorMesh = new THREE.Mesh(geometry, material);
+    sensorMesh.position.set(x, 2, z);
+
+    const sensorTop = new THREE.Mesh(
+        new THREE.SphereGeometry(1.2, 16, 16),
+        new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x0d7e25, emissiveIntensity: 0.3 })
+    );
+    sensorTop.position.set(0, 2.2, 0);
+    sensorMesh.add(sensorTop);
+
+    scene3D.add(sensorMesh);
+    sensores3D.push(sensorMesh);
+}
+
+function optimizarColocacionIA() {
+    console.log('IA calculando posiciones óptimas...');
+
+    if (!scene3D) {
+        console.warn('Escena 3D no inicializada. Llamando a init3DMap().');
+        init3DMap();
+        return;
+    }
+
+    const radio = 15;
+    const distancia = radio * 1.5;
+
+    // Limpiar sensores viejos
+    sensores3D.forEach(sensor => scene3D.remove(sensor));
+    sensores3D = [];
+
+    for (let x = -30; x <= 30; x += distancia) {
+        for (let z = -20; z <= 20; z += distancia) {
+            crearSensor3D(x, z);
+        }
+    }
+}
+
