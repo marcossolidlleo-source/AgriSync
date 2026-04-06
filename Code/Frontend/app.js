@@ -7,16 +7,16 @@
 const socket = io('http://158.158.108.187:3001');
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencias al DOM originales
-    const loginScreen = document.getElementById('loginScreen');
-    const dashboardScreen = document.getElementById('dashboardScreen');
-    const loginForm = document.getElementById('loginForm');
+    // Referencias al DOM originales (Sincronizadas con index.html)
+    const loginScreen = document.getElementById('login-screen');
+    const dashboardScreen = document.getElementById('dashboard-screen');
+    const loginForm = document.getElementById('login-form');
     const passwordInput = document.getElementById('password');
-    const loginError = document.getElementById('loginError');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const userRoleBadge = document.getElementById('userRole');
-    const adminControls = document.getElementById('adminControls');
-    const sensorGrid = document.getElementById('sensorGrid');
+    const loginError = document.getElementById('loginError'); // No existe en index.html, lo crearé o ignoraré
+    const logoutBtn = document.getElementById('logout-btn-sidebar');
+    const userRoleBadge = document.getElementById('user-role-display-side');
+    const adminControls = document.getElementById('adminControls'); // No existe en index.html, lo ignoraré o crearé
+    const sensorGrid = document.getElementById('sensor-cards-container');
     const exportSheetsBtn = document.getElementById('exportSheetsBtn');
 
     // --- 2. NUEVAS REFERENCIAS PARA CLIMA/SOCKET ---
@@ -32,10 +32,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Estado global
     let currentUserRole = null;
+    let selectedFarmId = null; // Finca seleccionada actualmente para el dashboard/mapa
     let sensorInterval = null;
     let lastEmailAlert = 0;
     let currentGlobalData = null;
     let myLandbot = null;
+
+    // Base de datos local de fincas (Simulada)
+    let fincas = JSON.parse(localStorage.getItem('agrisync_fincas')) || [
+        { id: 1, nombre: 'Hacienda El Sol', hectareas: 10.5, propietario: 'Admin', cultivo: 'Maíz', sector: 'Norte' },
+        { id: 2, nombre: 'Finca Los Olivos', hectareas: 5.2, propietario: 'Admin', cultivo: 'Olivos', sector: 'Sur' },
+        { id: 3, nombre: 'Granja Verde', hectareas: 3.8, propietario: 'Usuario', cultivo: 'Tomate', sector: 'Este' }
+    ];
+
+    function saveFincas() {
+        localStorage.setItem('agrisync_fincas', JSON.stringify(fincas));
+    }
 
     /* --- 3. NUEVA LÓGICA DE ESCUCHA SOCKET.IO --- */
     socket.on('connect', () => {
@@ -87,9 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (role) {
             login(role);
         } else {
-            loginError.classList.remove('hidden');
-            passwordInput.classList.add('border-red-500', 'focus:ring-red-500/20', 'focus:border-red-600');
-            passwordInput.classList.remove('focus:ring-green-500/20', 'focus:border-green-600');
+            // El elemento loginError no existe en el HTML, pero mantendremos la lógica de feedback visual
+            passwordInput.classList.add('border-red-500');
+            alert("Credenciales incorrectas");
         }
     });
 
@@ -106,24 +118,30 @@ document.addEventListener('DOMContentLoaded', () => {
         loginError.classList.add('hidden');
         passwordInput.value = '';
 
-        userRoleBadge.textContent = role;
-        userRoleBadge.className = role === 'Admin'
-            ? 'text-sm font-bold bg-purple-50 border border-purple-200 text-purple-800 px-4 py-1.5 rounded-full shadow-sm'
-            : 'text-sm font-bold bg-green-50 border border-green-200 text-green-800 px-4 py-1.5 rounded-full shadow-sm';
+        if (userRoleBadge) {
+            userRoleBadge.textContent = role;
+        }
 
-        if (role === 'Admin') {
-            adminControls.classList.remove('hidden');
-        } else {
-            adminControls.classList.add('hidden');
+        // Si tuvieras controles de administrador específicos:
+        if (adminControls) {
+            role === 'Admin' ? adminControls.classList.remove('hidden') : adminControls.classList.add('hidden');
         }
 
         loginScreen.classList.add('hidden');
         dashboardScreen.classList.remove('hidden');
+        
+        // Seleccionar la primera finca del usuario por defecto
+        const userFarms = fincas.filter(f => f.propietario === currentUserRole);
+        if (userFarms.length > 0) {
+            selectedFarmId = userFarms[0].id;
+        }
+
         initDashboard();
     }
 
     function logout() {
         currentUserRole = null;
+        selectedFarmId = null;
         if (sensorInterval) clearInterval(sensorInterval);
         dashboardScreen.classList.add('hidden');
         loginScreen.classList.remove('hidden');
@@ -132,9 +150,94 @@ document.addEventListener('DOMContentLoaded', () => {
     /* --- LÓGICA DEL DASHBOARD DE SENSORES --- */
 
     function initDashboard() {
+        renderFarmTabs();
+        updateDashboardFarmInfo();
+        populateFarmDropdowns();
+        renderCustomSensors();
         updateSensorsData();
+        if (sensorInterval) clearInterval(sensorInterval);
         sensorInterval = setInterval(updateSensorsData, 4000);
         initLandbot();
+    }
+
+    function renderFarmTabs() {
+        const tabsContainer = document.getElementById('user-farms-tabs');
+        if (!tabsContainer) return;
+
+        const userFarms = fincas.filter(f => f.propietario === currentUserRole);
+        tabsContainer.innerHTML = userFarms.map(farm => `
+            <button onclick="window.selectFarm(${farm.id})" 
+                class="px-4 py-2 rounded-xl border-2 transition-all whitespace-nowrap font-bold text-sm ${selectedFarmId === farm.id ? 'bg-emerald-600 border-emerald-600 text-white shadow-md' : 'bg-white border-gray-100 text-gray-500 hover:border-emerald-200'}">
+                <i class="fas fa-leaf mr-2"></i>${farm.nombre}
+            </button>
+        `).join('');
+    }
+
+    window.selectFarm = function(id) {
+        selectedFarmId = id;
+        renderFarmTabs();
+        updateDashboardFarmInfo();
+        populateFarmDropdowns();
+        // Opcional: refrescar sensores o mapa
+        if (contentSections[1].classList.contains('active')) {
+            init3DMap(true); // Forzar reinicio del mapa con nuevas dimensiones
+        }
+    };
+
+    function updateDashboardFarmInfo() {
+        const farm = fincas.find(f => f.id === selectedFarmId);
+        if (!farm) return;
+
+        const nameDisplay = document.getElementById('farm-name-display');
+        const hectaresDisplay = document.getElementById('farm-hectares-display');
+        const cropDisplay = document.getElementById('farm-crop-display');
+        const locationDisplay = document.getElementById('farm-location-display');
+
+        if (nameDisplay) nameDisplay.innerText = farm.nombre;
+        if (hectaresDisplay) hectaresDisplay.innerText = `${farm.hectareas} ha`;
+        if (cropDisplay) cropDisplay.innerText = farm.cultivo || 'No asignado';
+        if (locationDisplay) locationDisplay.innerText = `Sector ${farm.sector || 'General'}`;
+    }
+
+    function populateFarmDropdowns() {
+        const sensorFarmSelect = document.getElementById('sensor-farm-select');
+        const mapFarmSelect = document.getElementById('map-farm-select');
+        const userFarms = fincas.filter(f => f.propietario === currentUserRole);
+
+        const optionsHtml = userFarms.map(f => `<option value="${f.id}" ${f.id === selectedFarmId ? 'selected' : ''}>${f.nombre}</option>`).join('');
+        
+        if (sensorFarmSelect) sensorFarmSelect.innerHTML = optionsHtml;
+        if (mapFarmSelect) mapFarmSelect.innerHTML = optionsHtml;
+    }
+
+    // Registro de Nueva Finca
+    const addFarmForm = document.getElementById('add-farm-form');
+    if (addFarmForm) {
+        addFarmForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('new-farm-name').value;
+            const hectares = parseFloat(document.getElementById('new-farm-hectares').value);
+
+            const newFarm = {
+                id: Date.now(),
+                nombre: name,
+                hectareas: hectares,
+                propietario: currentUserRole,
+                cultivo: 'Pendiente',
+                sector: 'Nuevo'
+            };
+
+            fincas.push(newFarm);
+            saveFincas();
+            selectedFarmId = newFarm.id;
+            
+            addFarmForm.reset();
+            renderFarmTabs();
+            updateDashboardFarmInfo();
+            populateFarmDropdowns();
+            
+            alert(`Finca "${name}" registrada con éxito.`);
+        });
     }
 
     function updateSensorsData() {
@@ -249,6 +352,71 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Almacén de sensores vinculados a fincas
+    let sensoresPersonalizados = JSON.parse(localStorage.getItem('agrisync_sensores')) || [];
+
+    function saveSensores() {
+        localStorage.setItem('agrisync_sensores', JSON.stringify(sensoresPersonalizados));
+    }
+
+    // Manejo del formulario de nuevos sensores
+    const sensorForm = document.getElementById('sensor-form');
+    if (sensorForm) {
+        sensorForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const farmId = parseInt(document.getElementById('sensor-farm-select').value);
+            const plotName = document.getElementById('plot-name').value;
+            const cropType = document.getElementById('crop-type').value;
+            const metricType = document.getElementById('metric-type').value;
+            const idealValue = document.getElementById('ideal-value').value;
+
+            const newSensor = {
+                id: Date.now(),
+                farmId: farmId,
+                nombre: plotName,
+                cultivo: cropType,
+                metrica: metricType,
+                ideal: idealValue,
+                valorActual: (Math.random() * 100).toFixed(1) // Simulación
+            };
+
+            sensoresPersonalizados.push(newSensor);
+            saveSensores();
+            sensorForm.reset();
+            renderCustomSensors();
+            alert(`Sensor "${plotName}" añadido con éxito.`);
+        });
+    }
+
+    function renderCustomSensors() {
+        const container = document.getElementById('contenedorSensores');
+        if (!container) return;
+
+        // Filtrar por la finca seleccionada actualmente
+        const filtered = sensoresPersonalizados.filter(s => s.farmId === selectedFarmId);
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-400 italic py-4">No hay sensores adicionales en esta finca.</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                ${filtered.map(s => `
+                    <div class="custom-sensor-card flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
+                        <div>
+                            <p class="sensor-title font-bold text-gray-800">${s.nombre} (${s.cultivo})</p>
+                            <p class="sensor-detail text-xs text-gray-500">${s.metrica} - Ideal: ${s.ideal}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-black text-emerald-600">${s.valorActual}</p>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
     function initLandbot() {
         if (myLandbot || !window.Landbot) return;
         myLandbot = new Landbot.Livechat({
@@ -358,17 +526,27 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==================== MUNDO 3D PARA PARCELA (COMPLETO) ====================
-let scene3D = null, camera3D = null, renderer3D = null, sensores3D = [], map3DInitialized = false;
+let scene3D = null, camera3D = null, renderer3D = null, sensores3D = [], ground3D = null, map3DInitialized = false;
 
-function init3DMap() {
+function init3DMap(reset = false) {
     const container = document.getElementById('canvas-3d-container');
-    if (!container || map3DInitialized) return;
+    if (!container) return;
+    if (map3DInitialized && !reset) return;
+    
+    if (reset && renderer3D) {
+        container.innerHTML = '';
+        map3DInitialized = false;
+    }
+    
     map3DInitialized = true;
+    const farm = fincas.find(f => f.id === selectedFarmId) || { hectareas: 5 };
+    const baseWidth = Math.sqrt(farm.hectareas) * 20; // Escala proporcional a hectáreas
+    const baseDepth = baseWidth * 0.75;
 
     scene3D = new THREE.Scene();
     scene3D.background = new THREE.Color(0xf2f7f9);
     camera3D = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera3D.position.set(0, 80, 120);
+    camera3D.position.set(0, baseWidth, baseWidth * 1.5);
 
     renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer3D.setSize(container.clientWidth, container.clientHeight);
@@ -377,17 +555,17 @@ function init3DMap() {
 
     scene3D.add(new THREE.AmbientLight(0xffffff, 0.6));
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
-    directionalLight.position.set(80, 120, 100);
+    directionalLight.position.set(baseWidth, 120, 100);
     scene3D.add(directionalLight);
 
-    scene3D.add(new THREE.GridHelper(80, 16, 0x888888, 0xcccccc));
+    scene3D.add(new THREE.GridHelper(baseWidth * 1.5, 16, 0x888888, 0xcccccc));
 
-    const ground = new THREE.Mesh(
-        new THREE.PlaneGeometry(80, 60),
-        new THREE.MeshPhongMaterial({ color: 0x8cc56d, opacity: 0.35, transparent: true })
+    ground3D = new THREE.Mesh(
+        new THREE.PlaneGeometry(baseWidth, baseDepth),
+        new THREE.MeshPhongMaterial({ color: 0x8cc56d, opacity: 0.4, transparent: true, side: THREE.DoubleSide })
     );
-    ground.rotation.x = -Math.PI / 2;
-    scene3D.add(ground);
+    ground3D.rotation.x = -Math.PI / 2;
+    scene3D.add(ground3D);
 
     const animate = () => {
         requestAnimationFrame(animate);
@@ -405,7 +583,12 @@ function init3DMap() {
     optimizarColocacionIA();
 
     const btnOptimizar = document.getElementById('btn-optimizar-ia');
-    if (btnOptimizar) btnOptimizar.addEventListener('click', optimizarColocacionIA);
+    if (btnOptimizar) {
+        btnOptimizar.addEventListener('click', () => {
+            optimizarColocacionIA();
+            alert("Ubicación de sensores optimizada por IA para esta finca.");
+        });
+    }
 }
 
 function crearSensor3D(x, z) {
@@ -426,10 +609,22 @@ function optimizarColocacionIA() {
     if (!scene3D) return;
     sensores3D.forEach(sensor => scene3D.remove(sensor));
     sensores3D = [];
-    const distancia = 22.5;
-    for (let x = -30; x <= 30; x += distancia) {
-        for (let z = -20; z <= 20; z += distancia) {
+    
+    const farm = fincas.find(f => f.id === selectedFarmId) || { hectareas: 5 };
+    const baseWidth = Math.sqrt(farm.hectareas) * 20;
+    const baseDepth = baseWidth * 0.75;
+
+    // Distribuir sensores según hectáreas
+    const spacing = 20;
+    const padding = 5;
+    
+    for (let x = -(baseWidth/2) + padding; x <= (baseWidth/2) - padding; x += spacing) {
+        for (let z = -(baseDepth/2) + padding; z <= (baseDepth/2) - padding; z += spacing) {
             crearSensor3D(x, z);
         }
     }
+    
+    // Actualizar contadores en UI si existen
+    const totalMap = document.getElementById('total-sensores-mapa');
+    if (totalMap) totalMap.innerText = sensores3D.length;
 }

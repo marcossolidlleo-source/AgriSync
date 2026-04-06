@@ -543,63 +543,105 @@
                         </style>
 
                         <div id="section-dashboard" class="content-section active">
-                            <!-- Información de la finca -->
-                            <div class="card bg-card p-5 mb-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div>
-                                        <div class="flex items-center gap-3">
-                                            <h2 id="farm-name" class="text-lg font-semibold text-primary">Finca
-                                                Principal
-                                            </h2>
-                                            <button id="edit-farm-btn">Editar Finca</button>
+                            <!-- Información de la finca Seleccionada -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                <div class="card bg-gradient-to-br from-emerald-600 to-green-700 p-6 text-white overflow-hidden relative">
+                                    <div class="relative z-10">
+                                        <div class="flex items-center justify-between mb-6">
+                                            <div>
+                                                <h2 id="farm-name-display" class="text-2xl font-black mb-1">Cargando...</h2>
+                                                <p id="farm-location-display" class="text-emerald-100 text-xs font-bold uppercase tracking-widest italic opacity-80">Sector General</p>
+                                            </div>
+                                            <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/30">
+                                                <i class="fas fa-map-marked-alt text-xl text-yellow-300"></i>
+                                            </div>
                                         </div>
-                                        <p class="text-sm text-text-light mt-1">Cultivo: Maíz • Sector: Norte</p>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div class="bg-black/10 p-3 rounded-xl border border-white/10">
+                                                <p class="text-[0.65rem] font-bold text-emerald-200 uppercase mb-1">Superficie</p>
+                                                <p id="farm-hectares-display" class="text-xl font-black">-- ha</p>
+                                            </div>
+                                            <div class="bg-black/10 p-3 rounded-xl border border-white/10">
+                                                <p class="text-[0.65rem] font-bold text-emerald-200 uppercase mb-1">Cultivo</p>
+                                                <p id="farm-crop-display" class="text-xl font-black">--</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span class="px-3 py-1 bg-green-100 text-primary rounded-full text-sm font-medium">
-                                        <i class="fas fa-check-circle mr-1"></i> Activo
-                                    </span>
+                                    <!-- Decorative SVG pattern -->
+                                    <svg class="absolute -right-10 -bottom-10 w-48 h-48 opacity-10 text-white pointer-events-none" fill="currentColor" viewBox="0 0 200 200">
+                                        <path d="M40 80 L160 80 L100 20 Z M40 180 L160 180 L100 120 Z" />
+                                    </svg>
                                 </div>
-                                <div class="grid grid-cols-2 gap-4 text-center">
-                                    <div>
-                                        <p class="text-sm text-text-light">Área total</p>
-                                        <p class="font-semibold">5.2 ha</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-text-light">Última siembra</p>
-                                        <p class="font-semibold">15 Mar 2024</p>
-                                    </div>
+
+                                <!-- Card: Registrar Nueva Finca -->
+                                <div class="card bg-white border border-dashed border-emerald-300 p-6 flex flex-col justify-between hover:border-emerald-500 transition-all group">
+                                    <h3 class="text-emerald-800 font-black text-lg mb-4 flex items-center gap-2">
+                                        <i class="fas fa-plus-circle text-emerald-500 group-hover:rotate-90 transition-transform"></i> Registrar Nueva Finca
+                                    </h3>
+                                    <form id="add-farm-form" class="space-y-3">
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="text-[0.65rem] font-black text-gray-400 uppercase ml-1">Nombre</label>
+                                                <input type="text" id="new-farm-name" placeholder="Ej: Los Pinos" class="w-full text-sm p-3 border border-gray-100 rounded-xl outline-none focus:border-emerald-500 transition-colors bg-gray-50" required>
+                                            </div>
+                                            <div>
+                                                <label class="text-[0.65rem] font-black text-gray-400 uppercase ml-1">Hectáreas</label>
+                                                <input type="number" id="new-farm-hectares" placeholder="Ej: 4.5" step="0.1" class="w-full text-sm p-3 border border-gray-100 rounded-xl outline-none focus:border-emerald-500 transition-colors bg-gray-50" required>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-xl transition-all shadow-sm hover:shadow-md">
+                                            Guardar Finca
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
 
-                            <!-- Formulario Añadir Sensor/Parcela -->
+                            <!-- Listado de Fincas Rápidas (Switching) -->
+                            <div id="user-farms-tabs" class="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
+                                <!-- Generado por JS -->
+                            </div>
+
+                            <!-- Formulario Añadir Sensor (Actualizado) -->
                             <div class="add-sensor-form tracking-wide">
-                                <h3>Configurar Nuevo Sensor</h3>
+                                <h3 class="flex items-center gap-2 mb-6"><i class="fas fa-microchip text-primary"></i>Configurar Nuevo Sensor</h3>
                                 <form id="sensor-form">
-                                    <div class="form-group">
-                                        <label for="plot-name">Nombre de la Parcela</label>
-                                        <input type="text" id="plot-name" placeholder="Ej: Sector Variante" required>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="form-group">
+                                            <label for="plot-name">Nombre de la Parcela / Sector</label>
+                                            <input type="text" id="plot-name" placeholder="Ej: Sector Norte" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sensor-farm-select">Vincular a Finca</label>
+                                            <select id="sensor-farm-select" class="w-full text-sm p-3 border border-gray-200 rounded-xl bg-gray-50 font-bold text-gray-700" required>
+                                                <!-- Cargado dinámicamente -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="crop-type">Tipo de Cultivo</label>
+                                            <select id="crop-type" required class="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:border-primary transition-colors bg-gray-50 text-gray-700">
+                                                <option value="Maíz">🌽 Maíz</option>
+                                                <option value="Olivos">🫒 Olivos</option>
+                                                <option value="Tomate">🍅 Tomate</option>
+                                                <option value="Trigo">🌾 Trigo</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="metric-type">Métrica a Medir</label>
+                                            <select id="metric-type" required>
+                                                <option value="Humedad">Humedad (%)</option>
+                                                <option value="Temperatura">Temperatura (°C)</option>
+                                                <option value="pH">Nivel de pH</option>
+                                                <option value="Luz">Luz (lux)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="ideal-value">Valor Ideal (Referencia)</label>
+                                            <input type="number" id="ideal-value" placeholder="Ej: 60" step="0.1" required>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="crop-type">Tipo de Cultivo</label>
-                                        <select id="crop-type" required class="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:border-primary transition-colors bg-gray-50 text-gray-700">
-                                            <!-- Rellenado por JS -->
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="metric-type">Métrica a Medir</label>
-                                        <select id="metric-type" required>
-                                            <option value="Humedad">Humedad (%)</option>
-                                            <option value="Temperatura">Temperatura (°C)</option>
-                                            <option value="pH">Nivel de pH</option>
-                                            <option value="Luz">Luz (lux)</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="ideal-value">Valor Ideal</label>
-                                        <input type="number" id="ideal-value" placeholder="Ej: 60 (humedad) o 25 (temp)"
-                                            step="0.1" required>
-                                    </div>
-                                    <button type="submit" class="btn-add-sensor">➕ Añadir Sensor</button>
+                                    <button type="submit" class="btn-add-sensor mt-4 py-4 uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                                        <i class="fas fa-plus"></i> Añadir Sensor al Sistema
+                                    </button>
                                 </form>
                             </div>
 
@@ -713,7 +755,12 @@
                             <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
                                 <div>
                                     <h2 class="text-2xl font-black text-gray-800">Mapa de Dispositivos 3D</h2>
-                                    <p class="text-gray-500 text-sm">Optimización de cobertura por IA</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <label class="text-xs font-bold text-gray-400 uppercase">Finca:</label>
+                                        <select id="map-farm-select" onchange="window.selectFarm(parseInt(this.value))" class="text-sm font-bold text-emerald-700 bg-emerald-50 border-none outline-none cursor-pointer hover:underline">
+                                            <!-- Cargado por JS -->
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <button id="btn-optimizar-ia"
@@ -1112,6 +1159,27 @@
     <script>
         // ==================== VARIABLES DE ESTADO ====================
         let currentUserRole = "";
+        let fincas = JSON.parse(localStorage.getItem('agrisync_fincas'));
+        if (!fincas) {
+            fincas = [
+                { id: 1, nombre: 'Los Cedros', hectareas: 4.5, propietario: 'Administrador', cultivo: 'Tomate', sector: 'A' },
+                { id: 2, nombre: 'La Esperanza', hectareas: 12.0, propietario: 'Usuario', cultivo: 'Maíz', sector: 'General' }
+            ];
+            localStorage.setItem('agrisync_fincas', JSON.stringify(fincas));
+        }
+        let selectedFarmId = fincas[0].id;
+
+        function populateFarmDropdowns() {
+            const sensorFarmSelect = document.getElementById('sensor-farm-select');
+            const mapFarmSelect = document.getElementById('map-farm-select');
+            const userFarms = fincas.filter(f => f.propietario === currentUserRole);
+
+            const optionsHtml = userFarms.map(f => `<option value="${f.id}" ${f.id === selectedFarmId ? 'selected' : ''}>${f.nombre}</option>`).join('');
+            
+            if (sensorFarmSelect) sensorFarmSelect.innerHTML = optionsHtml;
+            if (mapFarmSelect) mapFarmSelect.innerHTML = optionsHtml;
+        }
+
 
         // ==================== CAPA DE DATOS ====================
         const sensorData = [
@@ -1489,6 +1557,8 @@
                     switchScreen("dashboard");
                     document.getElementById("password").value = "";
 
+                    populateFarmDropdowns(); // Populate farms after login
+
                     // Iniciar actualización automática
                     startAutoRefresh();
 
@@ -1560,6 +1630,32 @@
             });
 
             // Evento para probar alerta de Slack
+            const addFarmForm = document.getElementById('add-farm-form');
+            if (addFarmForm) {
+                addFarmForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const name = document.getElementById('new-farm-name').value;
+                    const hectares = parseFloat(document.getElementById('new-farm-hectares').value) || 0;
+                    
+                    const newFarm = {
+                        id: Date.now(),
+                        nombre: name,
+                        hectareas: hectares,
+                        propietario: currentUserRole,
+                        cultivo: 'Pendiente',
+                        sector: 'Nuevo'
+                    };
+
+                    fincas.push(newFarm);
+                    localStorage.setItem('agrisync_fincas', JSON.stringify(fincas));
+                    selectedFarmId = newFarm.id;
+                    populateFarmDropdowns();
+
+                    alert(`Finca "${name}" registrada con éxito.`);
+                    addFarmForm.reset();
+                });
+            }
+
             document.getElementById("test-slack-btn").addEventListener("click", function () {
                 const SLACK_WEBHOOK = 'https://hooks.slack.com/services/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';
 
@@ -1588,6 +1684,27 @@
                     icon.classList.add("fa-exclamation-triangle");
                 });
             });
+
+            // Evento para cambio de finca en el dropdown del Mapa 3D
+            const mapFarmSelect = document.getElementById('map-farm-select');
+            if (mapFarmSelect) {
+                mapFarmSelect.addEventListener('change', (e) => {
+                    selectedFarmId = parseInt(e.target.value);
+                    if (typeof init3DMap === 'function') {
+                        init3DMap(true); // Forzar reinicio
+                        mapFarmSelect.blur();
+                    }
+                });
+            }
+
+            // Mismo para el dropdown de sensor farm select para mantener sincronía
+            const sensorFarmSelect = document.getElementById('sensor-farm-select');
+            if (sensorFarmSelect) {
+                sensorFarmSelect.addEventListener('change', (e) => {
+                    selectedFarmId = parseInt(e.target.value);
+                    populateFarmDropdowns();
+                });
+            }
 
             // Toggle visibilidad de contraseña
             document.getElementById("toggle-password").addEventListener("click", function () {
@@ -2232,7 +2349,7 @@
             }
         }
 
-        function init3DMap() {
+        function init3DMap(reset = false) {
             console.log('init3DMap() llamado');
             const container = document.getElementById('canvas-3d-container');
             if (!container) {
@@ -2240,9 +2357,14 @@
                 return;
             }
 
-            if (map3DInitialized) {
+            if (map3DInitialized && !reset) {
                 console.log('Mapa 3D ya inicializado.');
                 return;
+            }
+            
+            if (reset && renderer3D) {
+                container.innerHTML = '';
+                map3DInitialized = false;
             }
 
             container.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-500">Iniciando motor 3D...</div>';
@@ -2261,6 +2383,10 @@
 
             // No marcar inicializado hasta que la escena se configure correctamente
             map3DInitialized = false;
+            
+            const farm = fincas.find(f => f.id === selectedFarmId) || { hectareas: 5 };
+            const baseWidth = Math.sqrt(farm.hectareas) * 20; // Escala proporcional a hectáreas
+            const baseDepth = baseWidth * 0.75;
 
             try {
                 scene3D = new THREE.Scene();
@@ -2270,7 +2396,7 @@
                 const height = container.clientHeight || 500;
 
                 camera3D = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                camera3D.position.set(0, 80, 120);
+                camera3D.position.set(0, baseWidth, baseWidth * 1.5);
 
                 renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
                 renderer3D.setPixelRatio(window.devicePixelRatio || 1);
@@ -2293,21 +2419,21 @@
             scene3D.add(ambient);
 
             const directional = new THREE.DirectionalLight(0xffffff, 0.6);
-            directional.position.set(80, 120, 100);
+            directional.position.set(baseWidth, 120, 100);
             scene3D.add(directional);
 
             sceneRoot = new THREE.Group();
             scene3D.add(sceneRoot);
 
-            const grid = new THREE.GridHelper(80, 16, 0x888888, 0xcccccc);
+            const grid = new THREE.GridHelper(baseWidth * 1.5, 16, 0x888888, 0xcccccc);
             sceneRoot.add(grid);
 
             const axes = new THREE.AxesHelper(20);
             sceneRoot.add(axes);
 
             const ground = new THREE.Mesh(
-                new THREE.PlaneGeometry(80, 60),
-                new THREE.MeshPhongMaterial({ color: 0x8cc56d, opacity: 0.35, transparent: true })
+                new THREE.PlaneGeometry(baseWidth, baseDepth),
+                new THREE.MeshPhongMaterial({ color: 0x8cc56d, opacity: 0.35, transparent: true, side: THREE.DoubleSide })
             );
             ground.rotation.x = -Math.PI / 2;
             sceneRoot.add(ground);
@@ -2660,21 +2786,26 @@
             }
 
             console.log('IA calculando posiciones óptimas...');
-            const radio = 15;
-            const distancia = radio * 1.33;
-
+            
             sensores3D.forEach(s => {
                 if (sceneRoot && sceneRoot.children.includes(s)) {
                     sceneRoot.remove(s);
-                } else {
+                } else if (scene3D.children.includes(s)) {
                     scene3D.remove(s);
                 }
             });
             sensores3D = [];
+            
+            const farm = fincas.find(f => f.id === selectedFarmId) || { hectareas: 5 };
+            const baseWidth = Math.sqrt(farm.hectareas) * 20;
+            const baseDepth = baseWidth * 0.75;
+            
+            const spacing = 20;
+            const padding = 5;
 
             let index = 0;
-            for (let x = -30; x <= 30; x += distancia) {
-                for (let z = -20; z <= 20; z += distancia) {
+            for (let x = -(baseWidth/2) + padding; x <= (baseWidth/2) - padding; x += spacing) {
+                for (let z = -(baseDepth/2) + padding; z <= (baseDepth/2) - padding; z += spacing) {
                     const tipo = tiposSensores[index % tiposSensores.length].tipo;
                     crearSensor3D(x, z, tipo);
                     index++;
