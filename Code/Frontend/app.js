@@ -56,18 +56,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('respuesta_clima', (data) => {
-        console.log('☀️ Datos recibidos del ESP32:', data);
+        console.log('☀️ Datos recibidos:', data);
         if (tempDisplay) {
-            tempDisplay.innerText = data.temperatura;
+            // Si viene del ESP32 procesado será data.temperatura
+            // Si viene el JSON de OpenWeather será data.main.temp
+            const valorTemp = data.temperatura || (data.main ? data.main.temp : '--');
+
+            tempDisplay.innerText = valorTemp + " °C"; // Añadimos la unidad
             tempDisplay.classList.add('animate-pulse');
             setTimeout(() => tempDisplay.classList.remove('animate-pulse'), 1000);
         }
-        if (statusMsg) statusMsg.innerText = "Actualizado correctamente";
+        if (statusMsg) statusMsg.innerText = "Clima actualizado desde el sensor";
     });
 
     /* --- 4. NUEVA FUNCIÓN GLOBAL PARA PEDIR CLIMA (GPS) --- */
     window.pedirClima = function () {
-        if (statusMsg) statusMsg.innerText = "Obteniendo ubicación...";
+        if (statusMsg) statusMsg.innerText = "⏳ Localizando parcela...";
 
         if (!navigator.geolocation) {
             alert("Tu navegador no soporta geolocalización");
@@ -76,16 +80,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                // Enviamos coordenadas al servidor para que el ESP32 las procese
-                socket.emit('solicitar_clima', { lat, lon });
-                if (statusMsg) statusMsg.innerText = "Petición enviada al ESP32...";
+                const coords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                socket.emit('solicitar_clima', coords);
+                if (statusMsg) statusMsg.innerText = "🚀 Petición enviada al ESP32...";
             },
             (err) => {
                 console.error("Error GPS:", err);
-                if (statusMsg) statusMsg.innerText = "Error: Permiso de GPS denegado";
-            }
+                let msg = "Error de ubicación";
+                if (err.code === 1) msg = "Debes permitir el acceso al GPS";
+                if (statusMsg) statusMsg.innerText = msg;
+            },
+            { enableHighAccuracy: true, timeout: 10000 } // Configuración extra
         );
     };
 
@@ -99,14 +104,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (role) {
             login(role);
         } else {
-            // El elemento loginError no existe en el HTML, pero mantendremos la lógica de feedback visual
             passwordInput.classList.add('border-red-500');
-            alert("Credenciales incorrectas");
+            // CAMBIO AQUÍ:
+            if (loginError) {
+                loginError.innerText = "Credenciales incorrectas";
+                loginError.classList.remove('hidden');
+            } else {
+                alert("Credenciales incorrectas"); // Fallback si no hay div de error
+            }
         }
     });
 
     passwordInput.addEventListener('input', () => {
-        loginError.classList.add('hidden');
+        if (loginError) loginError.classList.add('hidden');
         passwordInput.classList.remove('border-red-500', 'focus:ring-red-500/20', 'focus:border-red-600');
         passwordInput.classList.add('focus:ring-green-500/20', 'focus:border-green-600');
     });
@@ -115,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function login(role) {
         currentUserRole = role;
-        loginError.classList.add('hidden');
+        if (loginError) loginError.classList.add('hidden');
         passwordInput.value = '';
 
         if (userRoleBadge) {
@@ -129,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loginScreen.classList.add('hidden');
         dashboardScreen.classList.remove('hidden');
-        
+
         // Seleccionar la primera finca del usuario por defecto
         const userFarms = fincas.filter(f => f.propietario === currentUserRole);
         if (userFarms.length > 0) {
@@ -173,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    window.selectFarm = function(id) {
+    window.selectFarm = function (id) {
         selectedFarmId = id;
         renderFarmTabs();
         updateDashboardFarmInfo();
@@ -205,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userFarms = fincas.filter(f => f.propietario === currentUserRole);
 
         const optionsHtml = userFarms.map(f => `<option value="${f.id}" ${f.id === selectedFarmId ? 'selected' : ''}>${f.nombre}</option>`).join('');
-        
+
         if (sensorFarmSelect) sensorFarmSelect.innerHTML = optionsHtml;
         if (mapFarmSelect) mapFarmSelect.innerHTML = optionsHtml;
     }
@@ -230,12 +240,12 @@ document.addEventListener('DOMContentLoaded', () => {
             fincas.push(newFarm);
             saveFincas();
             selectedFarmId = newFarm.id;
-            
+
             addFarmForm.reset();
             renderFarmTabs();
             updateDashboardFarmInfo();
             populateFarmDropdowns();
-            
+
             alert(`Finca "${name}" registrada con éxito.`);
         });
     }
@@ -394,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Filtrar por la finca seleccionada actualmente
         const filtered = sensoresPersonalizados.filter(s => s.farmId === selectedFarmId);
-        
+
         if (filtered.length === 0) {
             container.innerHTML = '<p class="text-center text-gray-400 italic py-4">No hay sensores adicionales en esta finca.</p>';
             return;
@@ -532,12 +542,12 @@ function init3DMap(reset = false) {
     const container = document.getElementById('canvas-3d-container');
     if (!container) return;
     if (map3DInitialized && !reset) return;
-    
+
     if (reset && renderer3D) {
         container.innerHTML = '';
         map3DInitialized = false;
     }
-    
+
     map3DInitialized = true;
     const farm = fincas.find(f => f.id === selectedFarmId) || { hectareas: 5 };
     const baseWidth = Math.sqrt(farm.hectareas) * 20; // Escala proporcional a hectáreas
@@ -609,7 +619,7 @@ function optimizarColocacionIA() {
     if (!scene3D) return;
     sensores3D.forEach(sensor => scene3D.remove(sensor));
     sensores3D = [];
-    
+
     const farm = fincas.find(f => f.id === selectedFarmId) || { hectareas: 5 };
     const baseWidth = Math.sqrt(farm.hectareas) * 20;
     const baseDepth = baseWidth * 0.75;
@@ -617,13 +627,13 @@ function optimizarColocacionIA() {
     // Distribuir sensores según hectáreas
     const spacing = 20;
     const padding = 5;
-    
-    for (let x = -(baseWidth/2) + padding; x <= (baseWidth/2) - padding; x += spacing) {
-        for (let z = -(baseDepth/2) + padding; z <= (baseDepth/2) - padding; z += spacing) {
+
+    for (let x = -(baseWidth / 2) + padding; x <= (baseWidth / 2) - padding; x += spacing) {
+        for (let z = -(baseDepth / 2) + padding; z <= (baseDepth / 2) - padding; z += spacing) {
             crearSensor3D(x, z);
         }
     }
-    
+
     // Actualizar contadores en UI si existen
     const totalMap = document.getElementById('total-sensores-mapa');
     if (totalMap) totalMap.innerText = sensores3D.length;
