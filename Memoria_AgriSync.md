@@ -1,10 +1,10 @@
 # Memoria del Proyecto: Trabajo Final de Sistemas de Información
-## AgriSync - Tecnología Agrícola Inteligente
+## Osiris - Tecnología Agrícola Inteligente
 
 ---
 
 ### 1. Introducción
-En la actualidad, la agricultura se enfrenta al reto de maximizar su eficiencia y sostenibilidad bajo condiciones climáticas cada vez más impredecibles. **AgriSync** surge como una respuesta tecnológica orientada a la monitorización agrícola inteligente. Esta aplicación ha sido desarrollada para facilitar a los agricultores y gestores de fincas el seguimiento en tiempo real de los parámetros críticos de sus cultivos, mejorando la toma de decisiones y previniendo pérdidas. La relevancia de este proyecto radica en la integración de diferentes tecnologías (IoT, visualización 3D y web moderna) para crear un panel de control intuitivo y profesional que centraliza datos vitales del entorno agrícola.
+En la actualidad, la agricultura se enfrenta al reto de maximizar su eficiencia y sostenibilidad bajo condiciones climáticas cada vez más impredecibles. **Osiris** surge como una respuesta tecnológica orientada a la monitorización agrícola inteligente. Esta aplicación ha sido desarrollada para facilitar a los agricultores y gestores de fincas el seguimiento en tiempo real de los parámetros críticos de sus cultivos, mejorando la toma de decisiones y previniendo pérdidas. La relevancia de este proyecto radica en la integración de diferentes tecnologías (IoT, visualización 3D y web moderna) para crear un panel de control intuitivo y profesional que centraliza datos vitales del entorno agrícola.
 
 ### 2. Antecedentes
 El control de cosechas se ha realizado tradicionalmente mediante métodos manuales, requiriendo un gran esfuerzo físico y siendo propenso al error humano. Con el auge del Internet de las Cosas (IoT), han surgido soluciones comerciales (como FieldView, CropX o John Deere Operations Center) que ofrecen telemetría avanzada. 
@@ -13,11 +13,11 @@ El control de cosechas se ha realizado tradicionalmente mediante métodos manual
 - Alta precisión con hardware propietario.
 - Integración con maquinaria agrícola pesada.
 
-**Desventajas respecto a AgriSync:**
+**Desventajas respecto a Osiris:**
 - Suelen tener costes de licenciamiento y hardware muy elevados, innaccesibles para medianos y pequeños agricultores.
 - Curvas de aprendizaje pronunciadas debido a interfaces excesivamente complejas.
 
-**AgriSync** propone una alternativa ligera, con una interfaz web responsiva y amigable, que no depende estrictamente de ecosistemas cerrados y se integra mediante protocolos estándar de comunicación web, como Socket.io, ofreciendo alertas críticas automáticas y visualización 3D.
+**Osiris** propone una alternativa ligera, con una interfaz web responsiva y amigable, que no depende estrictamente de ecosistemas cerrados y se integra mediante protocolos estándar de comunicación web, como Socket.io, ofreciendo alertas críticas automáticas y visualización 3D.
 
 ### 3. Objetivos de la propuesta
 
@@ -114,7 +114,7 @@ function sendEmailAlert(data) {
         method: "POST",
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
-            _subject: "🚨 ALERTA CRÍTICA - AgriSync",
+            _subject: "🚨 ALERTA CRÍTICA - Osiris",
             // ...
             Humedad: data.humedad + "%",
         })
