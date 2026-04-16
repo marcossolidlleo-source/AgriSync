@@ -431,7 +431,7 @@
                     <a href="#parcela"
                         class="sidebar-link flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white">
                         <i class="fas fa-map w-5 text-center text-lg drop-shadow-sm"></i>
-                        <span class="font-medium text-[0.95rem]">Mapas y Lotes</span>
+                        <span class="font-medium text-[0.95rem]">Mapas</span>
                     </a>
                     <a href="#estadisticas"
                         class="sidebar-link flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white">
@@ -663,10 +663,14 @@
                                                 required>
                                         </div>
                                         <div class="form-group md:col-span-2">
-                                            <label for="sensor-location-mode">Opciones de Ubicación en el Modelo 3D</label>
-                                            <select id="sensor-location-mode" required class="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:border-primary transition-colors bg-gray-50 text-gray-700">
-                                                <option value="zona">Mantener en la zona asignada (si coincide el cultivo)</option>
-                                                <option value="todo">Asignar a todo el cultivo (calcular posición con fórmula matemática)</option>
+                                            <label for="sensor-location-mode">Opciones de Ubicación en el Modelo
+                                                3D</label>
+                                            <select id="sensor-location-mode" required
+                                                class="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:border-primary transition-colors bg-gray-50 text-gray-700">
+                                                <option value="zona">Mantener en la zona asignada (si coincide el
+                                                    cultivo)</option>
+                                                <option value="todo">Asignar a todo el cultivo (calcular posición con
+                                                    fórmula matemática)</option>
                                             </select>
                                         </div>
                                     </div>
@@ -1965,14 +1969,14 @@
 
                 sensorForm.addEventListener("submit", function (e) {
                     e.preventDefault();
-                    
+
                     const locationModeSelect = document.getElementById("sensor-location-mode");
                     const locationMode = locationModeSelect ? locationModeSelect.value : 'todo';
-                    
+
                     const normalizeStr = str => str.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     const cropInputValue = cropTypeInput.value.trim();
                     const targetNorm = normalizeStr(cropInputValue);
-                    
+
                     // Permitir también buscar inteligentemente por el nombre asignado al sector si el usuario lo escribe
                     const sensorPlotName = plotNameInput ? plotNameInput.value.trim() : "";
                     const targetPlotNorm = normalizeStr(sensorPlotName);
@@ -1980,11 +1984,11 @@
                     // Validar explícitamente si estamos en modo 'zona' para evitar inconsistencias
                     if (locationMode === 'zona') {
                         let sectorEncontrado = false;
-                        
+
                         // Verificar contra los sectores reales cargados en memoria
                         if (typeof parcelasCultivo !== 'undefined' && parcelasCultivo.length > 0) {
-                            sectorEncontrado = parcelasCultivo.some(p => 
-                                normalizeStr(p.nombre) === targetNorm || 
+                            sectorEncontrado = parcelasCultivo.some(p =>
+                                normalizeStr(p.nombre) === targetNorm ||
                                 (p.sectorId && normalizeStr(p.sectorId) === targetPlotNorm)
                             );
                         } else {
@@ -1995,9 +1999,9 @@
 
                         if (!sectorEncontrado) {
                             // Mostrar valores en crudo para depuración
-                            const availablePlots = typeof parcelasCultivo !== 'undefined' ? 
-                                parcelasCultivo.map(p => `${p.nombre} (${p.sectorId||''})`).join(', ') : 'Ninguna (Aún no cargadas)';
-                                
+                            const availablePlots = typeof parcelasCultivo !== 'undefined' ?
+                                parcelasCultivo.map(p => `${p.nombre} (${p.sectorId || ''})`).join(', ') : 'Ninguna (Aún no cargadas)';
+
                             alert(`Error de Validación:\nLa zona de cultivo o nombre de sector no corresponde al mapa actual.\n\nComparando:\n- Cultivo: "${cropInputValue}"\n- Sector/Nombre: "${sensorPlotName}"\n\nSectores Mapeados:\n[${availablePlots}]\n\nOperación cancelada. Revise los campos.`);
                             console.warn("Validación fallida: Buscando=", targetNorm, "o", targetPlotNorm, "Sectores Disp=", availablePlots);
                             return; // Prevenir guardado silencioso
@@ -2017,7 +2021,7 @@
                     localStorage.setItem("misParcelas", JSON.stringify(arrayDeSensores));
                     sensorForm.reset();
                     renderizarSensores();
-                    
+
                     // Refrescar 3D map forzando el recálculo matemático de todos los sectores
                     if (typeof window.optimizarColocacionIA === 'function' && window.scene3D) {
                         window.optimizarColocacionIA();
@@ -2433,12 +2437,12 @@
                         ${optionsHtml}
                     </select>
                 `;
-                
+
                 col.querySelector('select').addEventListener('change', () => {
                     const btnApply = document.getElementById('btn-apply-plots');
                     if (btnApply) btnApply.click();
                 });
-                
+
                 container.appendChild(col);
             }
         }
@@ -2692,7 +2696,7 @@
                         const cropInfo = baseDatosCultivos.find(c => c.nombre === cropName) || baseDatosCultivos[0];
 
                         // random color matching replaced by specific 8 palette mapping req
-                        const sectorPalette = ['#FF6B6B','#FFD93D','#6BCB77','#4D96FF','#C77DFF','#FF9A3C','#00C9A7','#F72585'];
+                        const sectorPalette = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#C77DFF', '#FF9A3C', '#00C9A7', '#F72585'];
                         const hexColorString = sectorPalette[i % sectorPalette.length].replace('#', '0x');
                         const cssColor = parseInt(hexColorString, 16);
 
@@ -2701,7 +2705,7 @@
 
                         const px = (colId * anchoCell) - (widthTot / 2) + (anchoCell / 2);
                         const pz = (rowId * altoCell) - (heightTot / 2) + (altoCell / 2);
-                        
+
                         const letterId = String.fromCharCode(65 + i); // Convierte 0 en 'A', 1 en 'B', etc.
 
                         parcelasCultivo.push({
@@ -2856,7 +2860,7 @@
                 const planeGeom = new THREE.PlaneGeometry(zone.ancho, zone.alto);
                 const planeMat = new THREE.MeshPhongMaterial({ color: zone.color, opacity: 0.55, transparent: true, side: THREE.DoubleSide });
                 const plane = new THREE.Mesh(planeGeom, planeMat);
-                
+
                 // Generar borde de 3px ensombrecido (~ darkened 0.3)
                 const edges = new THREE.EdgesGeometry(planeGeom);
                 const darkerColor = new THREE.Color(zone.color).multiplyScalar(0.7); // Darken via scalar ~ -0.3
@@ -2910,21 +2914,21 @@
             const N_base = 12;
             const cols_base = Math.ceil(Math.sqrt(N_base));
             const filas_base = Math.ceil(N_base / cols_base);
-            
+
             // Bounding box fijo general (Márgenes del mapa 80x60 -> 72x48)
             const x_min_base = -36, x_max_base = 36;
             const z_min_base = -24, z_max_base = 24;
-            
+
             const esp_x_base = (x_max_base - x_min_base) / (cols_base + 1);
             const esp_z_base = (z_max_base - z_min_base) / (filas_base + 1);
 
             for (let i = 0; i < N_base; i++) {
                 const col_i = (i % cols_base) + 1;
                 const fila_i = Math.floor(i / cols_base) + 1;
-                
+
                 const finalX = x_min_base + (col_i) * esp_x_base;
                 const finalZ = z_min_base + (fila_i) * esp_z_base;
-                
+
                 const tipo = tiposSensores[i % tiposSensores.length].tipo;
                 crearSensor3D(finalX, finalZ, tipo);
             }
@@ -2932,20 +2936,20 @@
             // Aplicar la misma la fórmula a los sensores reales del usuario iterando por sectores
             const arrayDeSensores = JSON.parse(localStorage.getItem("misParcelas")) || [];
             const sectoresInfo = {};
-            
+
             const normalizeStr = str => str.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
             arrayDeSensores.forEach(s => {
                 let rawKey = s.locationMode === 'zona' ? (s.tipoCultivo || 'TODO') : 'TODO';
                 let rawPlot = s.nombreParcela || '';
-                
+
                 // Si el cultivation type falla, intentamos usar el plotName (sensorId) como fallback para emparejamiento 
                 let sectorKey = 'TODO';
                 if (rawKey !== 'TODO') {
                     sectorKey = normalizeStr(rawKey);
                     // Agregamos comprobación para asociarlos via "SESCTOR D" si se falló la capital
                     const potentialMatch = parcelasCultivo.find(p => p.sectorId && normalizeStr(p.sectorId) === normalizeStr(rawPlot));
-                    if(potentialMatch && !parcelasCultivo.find(p => normalizeStr(p.nombre) === sectorKey)) {
+                    if (potentialMatch && !parcelasCultivo.find(p => normalizeStr(p.nombre) === sectorKey)) {
                         sectorKey = normalizeStr(potentialMatch.nombre); // Reenrutar a la propiedad física principal
                     }
                 }
@@ -3028,14 +3032,14 @@
                             const dx = posBuffer[j].x - posBuffer[i].x;
                             const dz = posBuffer[j].z - posBuffer[i].z;
                             let dist = Math.sqrt(dx * dx + dz * dz);
-                            
+
                             // Prevención si colisionan en 0 perfecto
                             if (dist < 0.001) {
                                 posBuffer[j].x += 0.5;
                                 posBuffer[j].z += 0.5;
                                 dist = 0.707;
                             }
-                            
+
                             if (dist < objRad) {
                                 const factor = (objRad - dist) / dist / 2;
                                 posBuffer[i].x -= dx * factor;
