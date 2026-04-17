@@ -1025,17 +1025,39 @@
                             </header>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-10">
-                                <div class="h-full flex flex-col justify-center items-center">
-                                    <iframe
-                                        class="w-full aspect-video rounded-2xl shadow-lg border border-gray-100 mb-4"
-                                        src="https://www.youtube.com/embed/3InE7DpFEyk?si=ZcK8Ey5wjO95jOTk"
-                                        title="YouTube video player" frameborder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowfullscreen></iframe>
-                                    <a href="https://youtu.be/3InE7DpFEyk" target="_blank" rel="noopener noreferrer"
-                                        class="self-start inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-5 rounded-xl shadow-md transition-all duration-200 hover:-translate-y-0.5 w-full justify-center sm:w-auto">
-                                        <i class="fab fa-youtube text-lg"></i> Abrir vídeo en pestaña nueva
-                                    </a>
+                                <div class="h-full flex flex-col justify-center w-full">
+                                    <div class="bg-gradient-to-br from-emerald-50 to-green-100/50 rounded-3xl p-6 md:p-8 shadow-sm border border-emerald-100 hover:shadow-md transition-shadow duration-300 w-full relative overflow-hidden">
+                                        <!-- Efecto Decorativo -->
+                                        <svg class="absolute -right-8 -bottom-8 w-40 h-40 text-emerald-600/5 pointer-events-none" fill="currentColor" viewBox="0 0 200 200"><path d="M100 20 A80 80 0 1 0 180 100 A80 80 0 0 0 100 20 Z" /></svg>
+
+                                        <h3 class="text-2xl font-black text-emerald-800 mb-4 flex items-center gap-3 relative z-10">
+                                            <i class="fas fa-seedling text-emerald-600 text-xl"></i> Nuestra Esencia
+                                        </h3>
+                                        <p class="text-sm md:text-base text-gray-700 leading-relaxed mb-6 text-justify relative z-10">
+                                            En Osiris, no solo instalamos sensores; <span class="font-bold text-emerald-800">sembramos el futuro</span>. Nacimos de la necesidad de entender la tierra para protegerla. Creemos en una tecnología que no reemplaza al agricultor, sino que le da <span class="font-bold text-emerald-800">superpoderes</span> para tomar decisiones basadas en datos reales, optimizando cada gota de agua y cada palmo de suelo.
+                                        </p>
+                                        
+                                        <ul class="space-y-4 relative z-10">
+                                            <li class="flex items-start gap-4">
+                                                <div class="w-10 h-10 rounded-2xl bg-emerald-200/50 flex flex-col justify-center items-center shrink-0 mt-0.5 shadow-inner">
+                                                    <i class="fas fa-globe-americas text-emerald-700"></i>
+                                                </div>
+                                                <p class="text-sm text-gray-700 leading-snug self-center"><span class="font-bold text-gray-900 block mb-0.5">Sostenibilidad</span> Eficiencia real para un planeta vivo.</p>
+                                            </li>
+                                            <li class="flex items-start gap-4">
+                                                <div class="w-10 h-10 rounded-2xl bg-emerald-200/50 flex flex-col justify-center items-center shrink-0 mt-0.5 shadow-inner">
+                                                    <i class="fas fa-shield-check text-emerald-700"></i>
+                                                </div>
+                                                <p class="text-sm text-gray-700 leading-snug self-center"><span class="font-bold text-gray-900 block mb-0.5">Transparencia</span> Datos claros, decisiones seguras.</p>
+                                            </li>
+                                            <li class="flex items-start gap-4">
+                                                <div class="w-10 h-10 rounded-2xl bg-emerald-200/50 flex flex-col justify-center items-center shrink-0 mt-0.5 shadow-inner">
+                                                    <i class="fas fa-hands-helping text-emerald-700"></i>
+                                                </div>
+                                                <p class="text-sm text-gray-700 leading-snug self-center"><span class="font-bold text-gray-900 block mb-0.5">Innovación Humana</span> Tecnología diseñada por y para el campo.</p>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                                 <div class="flex flex-col justify-center">
                                     <h3 class="text-xl font-bold text-gray-800 mb-3"><i
@@ -1257,11 +1279,26 @@
         </div>
     </div>
 
-    <!-- Botón Flotante de Instagram -->
-    <a href="https://www.instagram.com/osirisoficcial" target="_blank"
-        class="fixed bottom-6 left-6 z-[60] w-14 h-14 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full flex justify-center items-center text-white text-3xl shadow-lg hover:scale-110 hover:shadow-2xl transition-all duration-300">
-        <i class="fab fa-instagram"></i>
-    </a>
+    <!-- Redes Sociales Flotantes -->
+    <div class="fixed bottom-6 left-6 z-[60] flex flex-col gap-4">
+        <!-- Botón Flotante de YouTube -->
+        <a href="https://www.youtube.com/@Osiris-11-zk3" target="_blank"
+            class="w-14 h-14 bg-[#FF0000] rounded-full flex justify-center items-center text-white text-3xl shadow-lg hover:scale-110 hover:shadow-2xl transition-all duration-300">
+            <i class="fab fa-youtube"></i>
+        </a>
+        
+        <!-- Botón Flotante de TikTok -->
+        <a href="https://www.tiktok.com/@osiris_oficial_11" target="_blank"
+            class="w-14 h-14 bg-black rounded-full flex justify-center items-center text-white text-3xl shadow-lg hover:scale-110 hover:shadow-2xl transition-all duration-300">
+            <i class="fab fa-tiktok"></i>
+        </a>
+
+        <!-- Botón Flotante de Instagram -->
+        <a href="https://www.instagram.com/osirisoficcial" target="_blank"
+            class="w-14 h-14 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full flex justify-center items-center text-white text-3xl shadow-lg hover:scale-110 hover:shadow-2xl transition-all duration-300">
+            <i class="fab fa-instagram"></i>
+        </a>
+    </div>
 
     <script>
         // Sidebar Toggle Logic
