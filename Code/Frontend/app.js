@@ -318,6 +318,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function simularDatos() {
+        const nuevosDatos = {
+            humedad: Math.floor(Math.random() * 71) + 10, // Humedad entre 10% y 80%
+            temperatura: (Math.random() * 20 + 15).toFixed(1), // Temperatura entre 15°C y 35°C
+            ph: (Math.random() * 3 + 5).toFixed(1), // pH entre 5.0 y 8.0
+            iluminacion: Math.floor(Math.random() * 1901) + 100 // Iluminación entre 100 y 2000 lux
+        };
+
+        renderSensorUI(nuevosDatos);
+        currentGlobalData = nuevosDatos;
+
+        if (nuevosDatos.humedad < 30) {
+            const now = Date.now();
+            if (now - lastEmailAlert > 60000) {
+                sendEmailAlert(nuevosDatos);
+                lastEmailAlert = now;
+            }
+        }
+    }
+
+    const btnSimular = document.getElementById('btn-simular');
+    if (btnSimular) {
+        btnSimular.addEventListener('click', simularDatos);
+    }
+
     function renderSensorUI(data) {
         const ruleHumedadBaja = data.humedad < 30;
         const cardsDef = [
