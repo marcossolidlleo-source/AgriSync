@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memoria del Proyecto: Orisis - Tecnología Agrícola Inteligente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: white;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        h2 {
+            color: #27ae60;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        strong {
+            color: #27ae60;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            color: #d63384;
+        }
+        
+        pre {
+            background-color: #f8f8f8;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            border-radius: 3px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: #333;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+        
+        hr {
+            border: none;
+            border-top: 2px solid #bdc3c7;
+            margin: 30px 0;
+        }
+        
+        a {
+            color: #27ae60;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #27ae60;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        
+        .diagram {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        
+        .section {
+            page-break-inside: avoid;
+            margin-bottom: 30px;
+        }
+        
+        @media print {
+            body {
+                padding: 20px;
+            }
+            h1 {
+                page-break-after: avoid;
+            }
+            h2 {
+                page-break-after: avoid;
+            }
+            .section {
+                page-break-inside: avoid;
+            }
+            pre {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Memoria del Proyecto: Trabajo Final de Sistemas de Información</h1>
+    <p class="subtitle"><strong>Orisis - Tecnología Agrícola Inteligente</strong></p>
+    
+    <hr>
+    
+    <div class="section">
+        <h2>1. Introducción</h2>
+        <p>En la actualidad, la agricultura se enfrenta al reto de maximizar su eficiencia y sostenibilidad bajo condiciones climáticas cada vez más impredecibles. <strong>Orisis</strong> surge como una respuesta tecnológica orientada a la monitorización agrícola inteligente. Esta aplicación ha sido desarrollada para facilitar a los agricultores y gestores de fincas el seguimiento en tiempo real de los parámetros críticos de sus cultivos, mejorando la toma de decisiones y previniendo pérdidas. La relevancia de este proyecto radica en la integración de diferentes tecnologías (IoT, visualización 3D y web moderna) para crear un panel de control intuitivo y profesional que centraliza datos vitales del entorno agrícola.</p>
+    </div>
+    
+    <div class="section">
+        <h2>2. Antecedentes</h2>
+        <p>El control de cosechas se ha realizado tradicionalmente mediante métodos manuales, requiriendo un gran esfuerzo físico y siendo propenso al error humano. Con el auge del Internet de las Cosas (IoT), han surgido soluciones comerciales (como FieldView, CropX o John Deere Operations Center) que ofrecen telemetría avanzada.</p>
+        
+        <h3>Ventajas de aplicaciones comerciales:</h3>
+        <ul>
+            <li>Alta precisión con hardware propietario.</li>
+            <li>Integración con maquinaria agrícola pesada.</li>
+        </ul>
+        
+        <h3>Desventajas respecto a Orisis:</h3>
+        <ul>
+            <li>Suelen tener costes de licenciamiento y hardware muy elevados, innaccesibles para medianos y pequeños agricultores.</li>
+            <li>Curvas de aprendizaje pronunciadas debido a interfaces excesivamente complejas.</li>
+        </ul>
+        
+        <p><strong>Orisis</strong> propone una alternativa ligera, con una interfaz web responsiva y amigable, que no depende estrictamente de ecosistemas cerrados y se integra mediante protocolos estándar de comunicación web, como Socket.io, ofreciendo alertas críticas automáticas y visualización 3D.</p>
+    </div>
+    
+    <div class="section">
+        <h2>3. Objetivos de la propuesta</h2>
+        
+        <h3>Objetivo principal:</h3>
+        <p>Desarrollar un sistema de información web interactivo y en tiempo real para la monitorización, análisis y gestión de variables agrícolas (temperatura, humedad, pH e iluminación).</p>
+        
+        <h3>Objetivos específicos:</h3>
+        <ul>
+            <li>Implementar una interfaz de usuario <em>(Frontend)</em> interactiva y responsiva.</li>
+            <li>Integrar la recepción de datos telemétricos en tiempo real a través de WebSockets (Socket.io).</li>
+            <li>Visualizar la distribución espacial de los sensores mediante la renderización de un mapa 3D de las parcelas.</li>
+            <li>Proveer un sistema de alertas críticas (vía correo electrónico) ante variaciones perjudiciales en los cultivos (ej. riesgo de sequía).</li>
+            <li>Incluir un panel de administración con control de acceso basado en roles predefinidos.</li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>4. Diseño de la arquitectura</h2>
+        <p>El análisis del proyecto revela una arquitectura distribuida orientada a microservicios e IoT, compuesta principalmente por:</p>
+        
+        <ul>
+            <li><strong>Frontend (Cliente Web):</strong> Desarrollado en HTML, CSS (TailwindCSS) y JavaScript Vanilla. Representa la capa de presentación y maneja la lógica de la interfaz.</li>
+            <li><strong>Backend / Middleware (Servidor Externo):</strong> Aunque no presente directamente en el repositorio local, se infiere la existencia de un servidor alojado en una Máquina Virtual (IP: <code>158.158.108.187:3001</code>) gestionando conexiones a través de <strong>Node.js + Socket.io</strong> para emitir/recibir eventos hacia el cliente.</li>
+            <li><strong>Capa Física / IoT (ESP32):</strong> El código infiere la integración con un microcontrolador (ESP32) para la captura física de los datos climatológicos y geográficos reales, apoyado en el GPS del cliente.</li>
+            <li><strong>Servicios de Terceros (APIs):</strong> Integración con <code>formsubmit.co</code> para el envío de alertas por correo electrónico, y <code>Landbot.io</code> para asistencia automatizada.</li>
+        </ul>
+        
+        <h3>Diagrama Funcional / Textual de Despliegue:</h3>
+        <pre><code>[ Cliente Web (Navegador) ] 
+      |   (HTTP/HTTPS / Socket.io)
+      |---------------&gt; [ Servidor Node.js (VM: 158.158.108.187:3001) ]
+      |                        |
+      |   (Telemetría JSON)    |   (Socket)
+      |                        |
+[ Landbot API ]             [ ESP32 / Sensores Físicos ]
+[ FormSubmit API ]          (Toma de Temp, Humedad, pH, Lux)</code></pre>
+    </div>
+    
+    <div class="section">
+        <h2>5. Implementación</h2>
+        <p>El desarrollo detectado se compone de los siguientes elementos:</p>
+        
+        <h3>Lenguajes:</h3>
+        <p>HTML5, CSS3, JavaScript (ES6+).</p>
+        
+        <h3>Frameworks y Librerías:</h3>
+        <ul>
+            <li><strong>TailwindCSS (vía CDN):</strong> Para un diseño de interfaces ultrarrápido y altamente responsivo.</li>
+            <li><strong>THREE.js:</strong> Utilizado para inicializar y controlar el entorno de mapeo tridimensional de la parcela (<code>init3DMap()</code>).</li>
+            <li><strong>Socket.io (Client):</strong> Para posibilitar la comunicación asíncrona bidireccional con el hardware de monitorización.</li>
+            <li><strong>FontAwesome:</strong> Para iconografía vectorial.</li>
+        </ul>
+        
+        <h3>Organización del código:</h3>
+        <p>El proyecto sigue una estructura simple tipo <em>Monolithic Frontend</em> dentro de una carpeta <code>Code/Frontend</code>. Toda la lógica imperativa recae sobre el archivo <code>app.js</code>, donde se agrupan el routing visual (SPA manual), el generador de simulaciones, el mapeo 3D y la conexión por Socket.</p>
+        
+        <h3>Flujo de trabajo:</h3>
+        <p>Se detecta el uso de control de versiones <strong>Git</strong> (carpeta <code>.git</code> presente en el directorio base), lo que indica un flujo de desarrollo estructurado y versionado.</p>
+        
+        <h3>Detalles de lógica relevantes:</h3>
+        <ul>
+            <li>El acceso se simula en el cliente mediante un objeto diccionario que empareja contraseñas con roles (ej. <code>adminOrisis2026</code> para Admin).</li>
+            <li>El sistema intercala datos reales provenientes de <code>socket.on('respuesta_clima')</code> y un generador local en <code>updateSensorsData()</code> para complementar los indicadores en caso de que los sensores físicos carezcan de alguna lectura.</li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>6. Conclusiones y futuras mejoras</h2>
+        
+        <h3>Qué se ha conseguido:</h3>
+        <p>Se ha logrado construir un prototipo funcional robusto para el lado del cliente (Frontend). La aplicación destaca por su estética moderna, experiencia de usuario fluida y características avanzadas implementadas desde el navegador (Visualización 3D y conexión asíncrona real-time). La integración de alertas de correo electrónico directas sin necesidad de un backend complejo es una innovación pragmática destacable.</p>
+        
+        <h3>Limitaciones detectadas:</h3>
+        <ul>
+            <li><strong>Seguridad:</strong> Las credenciales y roles ('Admin' / 'Usuario') se encuentran <em>hardcodeadas</em> (en código plano) dentro de <code>app.js</code>, suponiendo una brecha de seguridad grave para despliegues en producción.</li>
+            <li><strong>Arquitectura de Software:</strong> Concentrar la totalidad de la lógica en un solo archivo de +400 líneas (<code>app.js</code>) compromete la escalabilidad a futuro.</li>
+            <li><strong>Persistencia de Datos:</strong> El historial de sensores simula su poblado dinámicamente; de cerrarse la pestaña, se pierden los registros simulados no almacenados en base de datos.</li>
+        </ul>
+        
+        <h3>Futuras Mejoras:</h3>
+        <ol>
+            <li><strong>Refactorización a un Framework SPA:</strong> Migrar de Vanilla JS a React.js, Vue o Angular, para separar la lógica de negocio orientada a componentes.</li>
+            <li><strong>Implementación de un Backend Local/API REST con JWT:</strong> Usar Node.js/Express y una base de datos (Ej., MongoDB o PostgreSQL) para el manejo de sesiones reales, la encriptación de claves, y el almacenamiento perpetuo del historial de sensores.</li>
+            <li><strong>Gestión Total Offline:</strong> Incorporar Service Workers y consideraciones PWA (Progressive Web App) para permitir interacciones incluso cuando el agricultor se encuentre en zonas sin cobertura.</li>
+        </ol>
+    </div>
+    
+    <div class="section">
+        <h2>7. Bibliografía</h2>
+        <ul>
+            <li><em>THREE.js Documentation</em>. Obtenido de <a href="https://threejs.org/docs/">https://threejs.org/docs/</a></li>
+            <li><em>Socket.IO Documentation</em>. Obtenido de <a href="https://socket.io/docs/">https://socket.io/docs/</a></li>
+            <li><em>Tailwind CSS Framework</em>. Obtenido de <a href="https://tailwindcss.com/docs">https://tailwindcss.com/docs</a></li>
+            <li><em>FormSubmit Service</em>. Obtenido de <a href="https://formsubmit.co/">https://formsubmit.co/</a></li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>8. Anexos</h2>
+        
+        <h3>Anexo A: Fragmento - Generación del Entorno 3D</h3>
+        <pre><code>// app.js (Fragmento de la lógica THREE.js)
+scene3D = new THREE.Scene();
+scene3D.background = new THREE.Color(0xf2f7f9);
+camera3D = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+camera3D.position.set(0, 80, 120);
+
+// Suelo del campo
+const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(80, 60),
+    new THREE.MeshPhongMaterial({ color: 0x8cc56d, opacity: 0.35, transparent: true })
+);
+ground.rotation.x = -Math.PI / 2;
+scene3D.add(ground);</code></pre>
+        
+        <h3>Anexo B: Fragmento - Envío de Alertas Críticas</h3>
+        <pre><code>// app.js (Fragmento de la API Fetch FormSubmit)
+function sendEmailAlert(data) {
+    fetch("https://formsubmit.co/ajax/agrisyncsif@gmail.com", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+            _subject: "🚨 ALERTA CRÍTICA - Orisis",
+            // ...
+            Humedad: data.humedad + "%",
+        })
+    })
+    // ...
+}</code></pre>
+    </div>
+    
+    <hr>
+    
+    <p style="text-align: center; margin-top: 50px; color: #7f8c8d; font-size: 0.9em;">
+        <strong>Documento generado automáticamente</strong> | <em>Orisis Project Documentation</em><br>
+        Presione <code>Ctrl+P</code> para imprimir/guardar como PDF
+    </p>
+</body>
+</html>
